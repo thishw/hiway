@@ -1,0 +1,111 @@
+"""Offline tests for scripts/check_site.py."""
+
+from __future__ import annotations
+
+import importlib.util
+import tempfile
+import unittest
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+_spec = importlib.util.spec_from_file_location(
+    "check_site", HERE.parent / "scripts" / "check_site.py"
+)
+cs = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(cs)
+
+
+def tree(root: Path, files: dict[str, str]) -> Path:
+    for rel, text in files.items():
+        p = root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text, encoding="utf-8")
+    return root
+
+
+class HandNumbersTests(unittest.TestCase):
+    def run_on(self, files: dict[str, str]) -> list[str]:
+        with tempfile.TemporaryDirectory() as tmp:
+            return cs.hand_numbers(tree(Path(tmp), files))
+
+    def test_counts_in_both_languages_and_orders_are_caught(self):
+        for text in (
+            "ships 15 agents",
+            "15 specialized agents",
+            "Rules (12)",
+            "스킬 15개",
+            "15개의 에이전트",
+            "규칙 12종",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(self.run_on({"content/a.md": text}), text)
+
+    def test_shortcodes_and_unrelated_numbers_pass(self):
+        ok = 'The release ships {{< kit "agents" >}} agents. P0 to P3. Six reviewers, 3 rounds, python3 3.9.'
+        self.assertEqual(
+            self.run_on(
+                {"content/a.md": ok, "layouts/x.html": '<rect x="194" y="78">'}
+            ),
+            [],
+        )
+
+    def test_version_outside_blog_fails_but_blog_history_is_allowed(self):
+        self.assertTrue(self.run_on({"layouts/home.html": "v5.2.1"}))
+        self.assertTrue(self.run_on({"i18n/en.toml": 'x = "5.2.1"'}))
+        self.assertEqual(self.run_on({"content/blog/p.md": "removed in v2.16.0"}), [])
+
+
+class OriginTests(unittest.TestCase):
+    def run_on(self, files: dict[str, str]) -> list[str]:
+        with tempfile.TemporaryDirectory() as tmp:
+            return cs.origins(tree(Path(tmp), files))
+
+    def test_same_origin_and_relative_pass(self):
+        html = (
+            '<link rel="stylesheet" href="/css/site.css"><script src="/js/t.js"></script>'
+            '<link rel="canonical" href="https://hiway.thishw.com/">'
+            '<link rel="alternate" hreflang="ko" href="https://hiway.thishw.com/ko/">'
+            '<a href="https://github.com/This-HW/hiway-kit">source</a>'
+        )
+        self.assertEqual(
+            self.run_on(
+                {
+                    "index.html": html,
+                    "css/site.css": "@font-face{src:url(/fonts/a.woff2)}",
+                }
+            ),
+            [],
+        )
+
+    def test_each_kind_of_foreign_load_fails(self):
+        cases = {
+            "script": '<script src="https://cdn.example.com/x.js"></script>',
+            "stylesheet": '<link rel="stylesheet" href="//fonts.googleapis.com/css2?family=X">',
+            "preconnect": '<link rel="preconnect" href="https://fonts.gstatic.com">',
+            "img": '<img src="https://example.com/p.png" alt="">',
+            "inline style": '<div style="background:url(https://example.com/b.png)"></div>',
+            "style block": "<style>@import url('https://example.com/a.css');</style>",
+            "tracker": "<script>gtag('config','G-1')</script>",
+        }
+        for name, html in cases.items():
+            with self.subTest(name=name):
+                self.assertTrue(self.run_on({"index.html": html}), name)
+
+    def test_css_font_from_cdn_fails(self):
+        self.assertTrue(
+            self.run_on(
+                {
+                    "index.html": "",
+                    "css/site.css": "@font-face{src:url(https://cdn.jsdelivr.net/a.woff2)}",
+                }
+            )
+        )
+
+    def test_ads_txt_fails(self):
+        self.assertTrue(
+            self.run_on({"index.html": "", "ads.txt": "google.com, pub-1, DIRECT"})
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,12 @@
+# Internal link check over the Hugo build output. External links are not fetched:
+# the gate is about this site's own pages, anchors, scripts, styles and fonts.
+DirectoryPath: "public"
+CheckExternal: false
+CheckInternal: true
+CheckInternalHash: true
+CheckFavicon: false
+CheckMetaRefresh: true
+IgnoreDirectoryMissingTrailingSlash: false
+IgnoreAltMissing: false
+EnforceHTTPS: false
+OutputDir: ".htmltest"

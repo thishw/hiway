@@ -1,0 +1,71 @@
+name: Check
+
+# The review gate for pull requests: the site builds without warnings, has no broken
+# internal links, carries no hand-written counts or versions, and loads nothing from
+# another origin. Runs without secrets, so it works on pull requests from forks.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hand-numbers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: No hand-written counts or versions in content/, layouts/, i18n/
+        run: python3 scripts/check_site.py hand-numbers
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Script tests (offline fixtures, standard library only)
+        run: python3 -m unittest discover -s tests -v
+
+  site:
+    runs-on: ubuntu-latest
+    env:
+      HUGO_VERSION: 0.163.3
+      HUGO_SHA256: 6e972f1e270ec202f35a717dbcf1c59b9fe24ac8967e391f3580f170a276ade7
+      HTMLTEST_VERSION: 0.17.0
+      HTMLTEST_SHA256: 775c597ee74899d6002cd2d93076f897f4ba68686bceabe2e5d72e84c57bc0fb
+    steps:
+      - name: Install Hugo (pinned, checksum verified)
+        run: |
+          wget -q -O "${{ runner.temp }}/hugo.deb" \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb"
+          echo "${HUGO_SHA256}  ${{ runner.temp }}/hugo.deb" | sha256sum -c -
+          sudo dpkg -i "${{ runner.temp }}/hugo.deb"
+      - name: Install htmltest (pinned, checksum verified)
+        run: |
+          tarball="${{ runner.temp }}/htmltest.tar.gz"
+          wget -q -O "$tarball" \
+            "https://github.com/wjdp/htmltest/releases/download/v${HTMLTEST_VERSION}/htmltest_${HTMLTEST_VERSION}_linux_amd64.tar.gz"
+          echo "${HTMLTEST_SHA256}  $tarball" | sha256sum -c -
+          mkdir -p "${{ runner.temp }}/bin"
+          tar -xzf "$tarball" -C "${{ runner.temp }}/bin" htmltest
+          echo "${{ runner.temp }}/bin" >> "$GITHUB_PATH"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Generate kit facts from the latest release tag
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/fetch-kit-facts.py
+      - name: Build (warnings are errors)
+        id: build
+        run: hugo --gc --minify --panicOnWarning
+      - name: No broken internal links
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: htmltest
+      - name: Nothing loaded from another origin, no trackers or ads
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: python3 scripts/check_site.py origins
+      - name: Upload the built site for visual review
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: site
+          path: public
+          retention-days: 14
