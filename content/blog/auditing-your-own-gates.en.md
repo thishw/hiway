@@ -6,6 +6,7 @@ description: "My completion gate was green. Then I pointed six fresh-context adv
 tags: ["adversarial review", "false-green", "completion gates", "security", "verification engineering"]
 translationKey: auditing-your-own-gates
 aliases: ["/posts/2026-07-03-auditing-your-own-gates/"]
+alias_to_lang: ko
 ---
 
 The three earlier pieces — [a map of harness and loop engineering](https://github.com/This-HW/hiway-kit/blob/main/docs/research/2026-07-harness-loop-engineering.md), [parallel git isolation in practice](/blog/harness-engineering-in-practice/), and [designing a durable completion gate](/blog/durable-executor-machine-gate/) — all converged on one direction: turn verification into a machine. This post is about the uncomfortable place that direction leads: **who verifies the verification machine?**

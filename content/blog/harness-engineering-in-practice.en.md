@@ -6,6 +6,7 @@ description: "A case study in applying 'Agent = Model + Harness' to a real Claud
 tags: ["harness engineering", "adversarial review", "git worktree", "race conditions", "verification gates"]
 translationKey: harness-engineering-in-practice
 aliases: ["/posts/2026-07-02-harness-engineering-in-practice/"]
+alias_to_lang: ko
 ---
 
 Harness engineering reads clearly on paper. The real test starts when you put those principles on top of a tool people actually run. This post records what happened when we applied the ideas from our [harness and loop engineering landscape](https://github.com/This-HW/hiway-kit/blob/main/docs/research/2026-07-harness-loop-engineering.md) to our own project, hiway-kit. It is also the story of how two rounds of adversarial review showed that a flaw we "knew" we had fixed was still there.

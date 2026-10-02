@@ -44,32 +44,32 @@ features:
       body: "명세로 확인되지 않은 전제를 P0 부터 P3 까지 등급으로 나눕니다. 데이터 무결성·보안·금융·핵심 비즈니스에 닿는 P0 만 작업을 멈추고 묻고, 나머지는 기본값을 적고 진행합니다."
       where:
         label: "skills/plan-task"
-        path: "tree/main/plugins/common/skills/plan-task"
+        path: "tree/plugins/common/skills/plan-task"
     - title: "적대적 리뷰"
       body: "`review-code` 는 작성자와 분리된 컨텍스트에서 완성된 diff 를 해커·머피·미래의 나·까다로운 사용자, 네 페르소나로 읽습니다. 설계는 `multi-perspective-review` 가 최대 열 가지 관점으로 검토합니다."
       where:
         label: "agents/dev/review-code.md"
-        path: "blob/main/plugins/common/agents/dev/review-code.md"
+        path: "blob/plugins/common/agents/dev/review-code.md"
     - title: "완료는 명령이 판정한다"
       body: "“완료”는 판단이 아닙니다. 검증 명령을 새로 실행해 출력을 읽기 전까지 에이전트는 “구현 완료, 검증 전”이라고 말하고 남은 것을 적습니다."
       where:
         label: "rules/definition-of-done.md"
-        path: "blob/main/plugins/common/rules/definition-of-done.md"
+        path: "blob/plugins/common/rules/definition-of-done.md"
     - title: "실패에서 배운다"
       body: "리뷰·검증에서 나온 결함은 `.git/kit/` 아래 피드백 원장에 쌓입니다(상한·중복 제거·감쇠). 다음 세션은 반복되는 결함을 교훈으로 받고 시작합니다."
       where:
         label: "tools/feedback_ledger.py"
-        path: "blob/main/plugins/common/tools/feedback_ledger.py"
+        path: "blob/plugins/common/tools/feedback_ledger.py"
     - title: "경계는 프로젝트 도구로 지킨다"
       body: "프로젝트에 import-linter·dependency-cruiser 같은 경계 검사 도구가 있으면 `plan-task` 가 그 명령을 계획의 완료 조건에 넣습니다. 도구가 없으면 없다고 적고, 도입은 사용자가 정합니다."
       where:
         label: "plan-task/references/boundary-check.md"
-        path: "blob/main/plugins/common/skills/plan-task/references/boundary-check.md"
+        path: "blob/plugins/common/skills/plan-task/references/boundary-check.md"
     - title: "여러 하네스에서"
       body: "규칙과 스킬은 Claude Code·Codex·Antigravity 에서 모두 작동합니다. 전용 서브에이전트와 도구 호출을 막는 훅은 Claude Code 기능이고, 다른 하네스에서는 같은 규율이 지침으로 전달됩니다."
       where:
-        label: "README · Other Harnesses"
-        path: "blob/main/README.md#other-harnesses-codex--antigravity"
+        label: "README: Other Harnesses"
+        path: "blob/README.md#other-harnesses-codex--antigravity"
 
 harnesses:
   heading: "지원 하네스"

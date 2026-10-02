@@ -24,40 +24,55 @@ SITE_HOST = "hiway.thishw.com"
 #
 # Counts and the current version must come from data/kit.json. These patterns catch
 # a number written next to what it counts, in English and Korean, in either order.
+COUNT_NOUN_EN = r"(?:sub-?)?(?:agents?|skills?|rules?|hooks?)"
+COUNT_NOUN_KO = r"(?:에이전트|서브에이전트|스킬|규칙|룰|훅)"
 COUNT_PATTERNS = [
-    re.compile(
-        r"\b\d+\s+(?:specialized\s+|core\s+|governance\s+|bundled\s+)?(?:agents?|skills?|rules?|hooks?)\b",
-        re.I,
-    ),
-    re.compile(r"\b(?:agents?|skills?|rules?|hooks?)\s*\(\s*\d+\s*\)", re.I),
-    re.compile(r"\d+\s*(?:개의?|종의?)?\s*(?:전문\s*)?(?:에이전트|스킬|규칙|훅)"),
-    re.compile(r"(?:에이전트|스킬|규칙|훅)\s*\d+\s*(?:개|종)"),
+    # "15 agents", "15 specialized agents", "15 review sub-agents" (up to two words between)
+    re.compile(rf"(?<![\d.])\b\d+\s+(?:[A-Za-z][\w-]*\s+){{0,2}}{COUNT_NOUN_EN}\b", re.I),
+    # "Rules (12)", "agents: 15"
+    re.compile(rf"\b{COUNT_NOUN_EN}\s*(?:\(\s*\d+\s*\)|:\s*\d+\b)", re.I),
+    # "15개의 에이전트", "12개 거버넌스 룰", "15 전문 에이전트"
+    re.compile(rf"(?<![\d.])\d+\s*(?:개의?|종의?)?\s*(?:[가-힣A-Za-z-]+\s+){{0,2}}{COUNT_NOUN_KO}"),
+    # "스킬 15개", "거버넌스 룰 12종"
+    re.compile(rf"{COUNT_NOUN_KO}\s*\d+\s*(?:개|종)"),
 ]
-# A release version (X.Y.Z). Blog posts are dated case studies and may name the
-# release where something changed, so content/blog is exempt from this one only.
-VERSION_PATTERN = re.compile(r"\bv?\d+\.\d+\.\d+\b")
-SCAN_DIRS = ("content", "layouts", "i18n")
+# Emphasis and entities must not hide a number from the patterns ("**15** agents").
+NORMALIZE = re.compile(r"\*\*|__|</?(?:strong|b|em|i|span)[^>]*>")
+SPACES = re.compile(r"&nbsp;|&#160;|&#xa0;|\u00a0", re.I)
+# A release version (X.Y.Z, or X.Y with a v). Blog posts are dated case studies and may name
+# the release where something changed, so content/blog is exempt from this one only.
+VERSION_PATTERN = re.compile(r"\bv?\d+\.\d+\.(?:\d+|x)\b|\bv\d+\.\d+\b", re.I)
+# Every hand-written source that reaches a rendered page. data/kit.json is generated.
+SCAN_PATHS = ("content", "layouts", "i18n", "assets", "static", "data", "hugo.toml")
+SKIP_FILES = {"data/kit.json"}
 VERSION_EXEMPT = ("content/blog/",)
-TEXT_SUFFIXES = {".md", ".html", ".toml", ".txt", ".xml", ".json", ".yaml", ".yml"}
+TEXT_SUFFIXES = {".md", ".html", ".toml", ".txt", ".xml", ".json", ".yaml", ".yml", ".css", ".js", ".svg"}
+
+
+def _files(root: Path):
+    for entry in SCAN_PATHS:
+        p = root / entry
+        if p.is_file():
+            yield p
+        elif p.is_dir():
+            yield from sorted(f for f in p.rglob("*") if f.is_file())
 
 
 def hand_numbers(root: Path) -> list[str]:
     problems: list[str] = []
-    for d in SCAN_DIRS:
-        for f in sorted((root / d).rglob("*")):
-            if not f.is_file() or f.suffix not in TEXT_SUFFIXES:
-                continue
-            rel = f.relative_to(root).as_posix()
-            check_version = not rel.startswith(VERSION_EXEMPT)
-            for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
-                for pat in COUNT_PATTERNS:
-                    for m in pat.finditer(line):
-                        problems.append(f"{rel}:{n}: hand-written count {m.group(0)!r}")
-                if check_version:
-                    for m in VERSION_PATTERN.finditer(line):
-                        problems.append(
-                            f"{rel}:{n}: hand-written version {m.group(0)!r}"
-                        )
+    for f in _files(root):
+        rel = f.relative_to(root).as_posix()
+        if f.suffix not in TEXT_SUFFIXES or rel in SKIP_FILES or rel.startswith("static/fonts/"):
+            continue
+        check_version = not rel.startswith(VERSION_EXEMPT)
+        for n, raw in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+            line = NORMALIZE.sub("", SPACES.sub(" ", raw))
+            for pat in COUNT_PATTERNS:
+                for m in pat.finditer(line):
+                    problems.append(f"{rel}:{n}: hand-written count {m.group(0)!r}")
+            if check_version:
+                for m in VERSION_PATTERN.finditer(line):
+                    problems.append(f"{rel}:{n}: hand-written version {m.group(0)!r}")
     return problems
 
 
@@ -74,6 +89,11 @@ FETCHING = {
     "embed": ("src",),
     "object": ("data",),
     "track": ("src",),
+    "input": ("src",),
+    "image": ("href", "xlink:href"),
+    "use": ("href", "xlink:href"),
+    "feimage": ("href", "xlink:href"),
+    "base": ("href",),
 }
 # <link> rels that fetch. canonical/alternate are navigation metadata, not fetches.
 FETCHING_LINK_RELS = {
@@ -81,6 +101,7 @@ FETCHING_LINK_RELS = {
     "preload",
     "modulepreload",
     "prefetch",
+    "prerender",
     "preconnect",
     "dns-prefetch",
     "icon",
@@ -88,7 +109,7 @@ FETCHING_LINK_RELS = {
     "apple-touch-icon",
     "mask-icon",
 }
-CSS_URL = re.compile(r"""url\(\s*['"]?([^'")\s]+)""", re.I)
+CSS_URL = re.compile(r"""(?:url|image-set|image)\(\s*['"]?([^'")\s,]+)""", re.I)
 CSS_IMPORT = re.compile(r"""@import\s+(?:url\()?\s*['"]?([^'")\s;]+)""", re.I)
 TRACKERS = re.compile(
     r"googletagmanager|google-analytics|gtag\(|adsbygoogle|pagead2\.googlesyndication|plausible\.io|"
@@ -98,13 +119,20 @@ TRACKERS = re.compile(
 
 
 def foreign(url: str) -> bool:
-    url = url.strip()
+    """True when loading ``url`` would leave the site's own HTTPS origin."""
+    # Browsers treat "\\" like "/" in URLs, so "/\\evil.example/x" is protocol-relative.
+    url = url.strip().replace("\\", "/")
     if not url or url.startswith(("#", "data:", "mailto:", "tel:")):
         return False
     parts = urlsplit(url)
     if url.startswith("//") or parts.scheme in ("http", "https"):
-        return parts.hostname != SITE_HOST
+        # Same host over plain http is mixed content — a different origin.
+        return parts.hostname != SITE_HOST or parts.scheme == "http"
     return bool(parts.scheme) and parts.scheme not in ("data", "blob")
+
+
+# A URL literal inside script code (fetch("https://…"), import("//…")).
+SCRIPT_URL = re.compile(r"""["'`](?:https?:)?//[^"'`\s]+""", re.I)
 
 
 class _Collector(HTMLParser):
@@ -168,17 +196,21 @@ def origins(public: Path) -> list[str]:
                     if foreign(url):
                         problems.append(f"{rel}:{line}: inline CSS loads {url}")
             for line, js in c.inline_js:
-                if re.search(r"https?://|//[a-z0-9.-]+\.[a-z]{2,}/", js, re.I):
-                    problems.append(f"{rel}:{line}: inline script references a URL")
+                for m in SCRIPT_URL.finditer(js):
+                    if foreign(m.group(0)[1:]):
+                        problems.append(f"{rel}:{line}: inline script references {m.group(0)[1:]}")
             for m in TRACKERS.finditer(text):
                 problems.append(f"{rel}: tracker or ad code {m.group(0)!r}")
-        elif f.suffix == ".css":
+        elif f.suffix in (".css", ".svg"):
             text = f.read_text(encoding="utf-8")
             for url in css_urls(text):
                 if foreign(url):
                     problems.append(f"{rel}: CSS loads {url}")
         elif f.suffix == ".js":
             text = f.read_text(encoding="utf-8")
+            for m in SCRIPT_URL.finditer(text):
+                if foreign(m.group(0)[1:]):
+                    problems.append(f"{rel}: script references {m.group(0)[1:]}")
             for m in TRACKERS.finditer(text):
                 problems.append(f"{rel}: tracker or ad code {m.group(0)!r}")
     return problems

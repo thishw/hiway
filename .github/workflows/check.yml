@@ -13,6 +13,7 @@ permissions:
 jobs:
   hand-numbers:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: No hand-written counts or versions in content/, layouts/, i18n/
@@ -20,6 +21,7 @@ jobs:
 
   unit:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Script tests (offline fixtures, standard library only)
@@ -27,6 +29,7 @@ jobs:
 
   site:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       HUGO_VERSION: 0.163.3
       HUGO_SHA256: 6e972f1e270ec202f35a717dbcf1c59b9fe24ac8967e391f3580f170a276ade7

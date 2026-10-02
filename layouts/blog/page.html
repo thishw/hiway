@@ -18,7 +18,7 @@
     {{- with .PrevInSection }}<a href="{{ .RelPermalink }}" rel="next">{{ .LinkTitle }}</a>{{ end }}
   </nav>
   {{- with .Params.tags }}
-  <ul class="tags" aria-label="tags">{{ range . }}<li>{{ . }}</li>{{ end }}</ul>
+  <ul class="tags" aria-label="{{ T "tags" }}">{{ range . }}<li>{{ . }}</li>{{ end }}</ul>
   {{- end }}
 </article>
 {{ end }}

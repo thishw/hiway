@@ -11,8 +11,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # Queue deployments instead of cancelling one in flight — keeps publish order.
 concurrency:
@@ -22,10 +20,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
+      # Bump each version together with its checksum.
       HUGO_VERSION: 0.163.3
-      # Bump together with HUGO_VERSION.
       HUGO_SHA256: 6e972f1e270ec202f35a717dbcf1c59b9fe24ac8967e391f3580f170a276ade7
+      HTMLTEST_VERSION: 0.17.0
+      HTMLTEST_SHA256: 775c597ee74899d6002cd2d93076f897f4ba68686bceabe2e5d72e84c57bc0fb
     steps:
       - name: Install Hugo (pinned, checksum verified)
         run: |
@@ -34,6 +35,15 @@ jobs:
           echo "${HUGO_SHA256}  ${{ runner.temp }}/hugo.deb" | sha256sum -c -
           sudo dpkg -i "${{ runner.temp }}/hugo.deb"
           hugo version
+      - name: Install htmltest (pinned, checksum verified)
+        run: |
+          tarball="${{ runner.temp }}/htmltest.tar.gz"
+          wget -q -O "$tarball" \
+            "https://github.com/wjdp/htmltest/releases/download/v${HTMLTEST_VERSION}/htmltest_${HTMLTEST_VERSION}_linux_amd64.tar.gz"
+          echo "${HTMLTEST_SHA256}  $tarball" | sha256sum -c -
+          mkdir -p "${{ runner.temp }}/bin"
+          tar -xzf "$tarball" -C "${{ runner.temp }}/bin" htmltest
+          echo "${{ runner.temp }}/bin" >> "$GITHUB_PATH"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Generate kit facts from the latest release tag
         # A failure here stops the deploy; the site already live stays as it is.
@@ -45,6 +55,14 @@ jobs:
       - name: Build
         # baseURL is fixed in hugo.toml. Never pass --baseURL here.
         run: hugo --gc --minify --panicOnWarning
+      # Part of the site (CHANGELOG, PRIVACY) arrives from the kit's release tag without a
+      # pull request here, so the same gates as check.yml run before anything is published.
+      - name: "Gate: no hand-written counts or versions"
+        run: python3 scripts/check_site.py hand-numbers
+      - name: "Gate: no broken internal links"
+        run: htmltest
+      - name: "Gate: nothing loaded from another origin, no trackers or ads"
+        run: python3 scripts/check_site.py origins
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
@@ -53,6 +71,10 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

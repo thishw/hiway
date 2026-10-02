@@ -118,19 +118,24 @@ def extract_tarball(blob: bytes, dest: Path, expect_sha: str) -> Path:
     try:
         with tarfile.open(archive, "r:gz") as tf:
             comment = tf.pax_headers.get("comment")
-            if comment and comment != expect_sha:
+            if comment != expect_sha:
                 raise FactsError(f"tarball commit {comment} != tag commit {expect_sha}")
             members = tf.getmembers()
             for m in members:
                 p = Path(m.name)
-                if p.is_absolute() or ".." in p.parts or m.issym() or m.islnk():
+                if p.is_absolute() or ".." in p.parts:
+                    continue
+                if m.issym() or m.islnk():
+                    if "plugins" in p.parts:
+                        raise FactsError(f"link inside plugins/ would be skipped and skew counts: {m.name}")
                     continue
                 if m.isdir() or m.isfile():
                     kw = {"filter": "data"} if hasattr(tarfile, "data_filter") else {}
                     tf.extract(m, dest / "src", set_attrs=False, **kw)
     except tarfile.TarError as e:
         raise FactsError(f"bad tarball: {e}") from e
-    roots = [p for p in (dest / "src").iterdir() if p.is_dir()]
+    src = dest / "src"
+    roots = [p for p in src.iterdir() if p.is_dir()] if src.is_dir() else []
     if len(roots) != 1:
         raise FactsError(f"tarball has {len(roots)} top-level directories, expected 1")
     return roots[0]
@@ -232,6 +237,8 @@ def validate(facts: dict) -> None:
     src = facts.get("source") or {}
     need(src.get("mode") in ("tag", "local"), "source.mode must be tag|local")
     need(isinstance(src.get("tag"), str) and src["tag"] != "", "source.tag required")
+    if src.get("mode") == "tag":
+        need(bool(re.fullmatch(r"[0-9a-f]{40}", str(src.get("commit", "")))), "source.commit must be a 40-hex sha")
     need(
         isinstance(src.get("date"), str) and bool(DATE_RE.match(src.get("date", ""))),
         "source.date must be YYYY-MM-DD",
@@ -256,6 +263,10 @@ def validate(facts: dict) -> None:
     cl = facts.get("changelog")
     need(isinstance(cl, list) and len(cl) > 0, "changelog must have at least one entry")
     for e in cl or []:
+        need(
+            isinstance(e.get("headings"), list) and all(isinstance(h, str) for h in e["headings"]),
+            f"changelog headings must be a list of strings ({e.get('version')!r})",
+        )
         need(
             bool(SEMVER_RE.match(e.get("version", ""))),
             f"changelog version invalid: {e.get('version')!r}",
@@ -312,6 +323,8 @@ def from_path(path: Path, repo: str = REPO) -> dict:
 
     sha = git("rev-parse", "HEAD")
     tag = git("describe", "--tags", "--exact-match", "HEAD") or "local"
+    if git("status", "--porcelain"):
+        tag = f"{tag}-dirty"  # counted files are not exactly the tagged release
     date = git("log", "-1", "--format=%cs") or dt.date.today().isoformat()
     return collect(
         path, {"repo": repo, "mode": "local", "tag": tag, "commit": sha, "date": date}
@@ -335,13 +348,15 @@ def main(argv: list[str] | None = None) -> int:
             else from_tag(args.repo)
         )
         validate(facts)
-    except FactsError as e:
-        print(f"fetch-kit-facts: {e}", file=sys.stderr)
+    except Exception as e:  # noqa: BLE001 — every failure must stop the build
+        # Never leave last run's facts behind: a later `hugo` would build with them.
+        args.out.unlink(missing_ok=True)
+        print(f"fetch-kit-facts: {type(e).__name__}: {e}", file=sys.stderr)
         return 1
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(
-        json.dumps(facts, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    tmp = args.out.with_name(args.out.name + ".tmp")
+    tmp.write_text(json.dumps(facts, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp, args.out)
     c = facts["counts"]
     print(
         f"fetch-kit-facts: {facts['source']['mode']} {facts['source']['tag']} → {args.out} "

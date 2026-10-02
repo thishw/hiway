@@ -70,8 +70,8 @@ In CI, Hugo and htmltest are downloaded at a pinned version and verified against
 
 ## Deploy
 
-`pages.yml` runs on push to `main`, weekly on Monday (to pick up new hiway-kit releases), and on manual dispatch: fetch facts → `hugo` → GitHub Pages. Never add `--baseURL` to the build; preview a production build locally with `hugo --baseURL http://localhost:1313/` instead.
+`pages.yml` runs on push to `main`, weekly on Monday (to pick up new hiway-kit releases), and on manual dispatch: fetch facts → `hugo` → the same hand-numbers, link and origin gates as `check.yml` → GitHub Pages. The gates run on deploy too because CHANGELOG and PRIVACY text arrive from the kit's release tag without a pull request here. Never add `--baseURL` to the build; preview a production build locally with `hugo --baseURL http://localhost:1313/` instead.
 
 ## Old addresses
 
-The four posts that moved from `this-hw.github.io/hiway-kit/posts/<date>-<slug>/` declare Hugo `aliases` for `/posts/<date>-<slug>/`; those redirect to the Korean version at `/ko/blog/<slug>/` (`layouts/alias.html`).
+The four posts that moved from `this-hw.github.io/hiway-kit/posts/<date>-<slug>/` declare Hugo `aliases` for `/posts/<date>-<slug>/` on their English page with `alias_to_lang: ko`; those addresses redirect to the Korean version at `/ko/blog/<slug>/` (`layouts/alias.html`). Without `alias_to_lang` an alias redirects to its own page.

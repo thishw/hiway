@@ -65,11 +65,11 @@ Claude Code 에는 이미 에이전트·스킬·훅·워크플로·텔레메트�
 
 ## 규모에 맞는 오케스트레이션
 
-작은·중간 작업은 스킬이 주도하는 평평한 디스패치로 돕니다. 큰 작업은 사용자가 선택하면 Claude Code 네이티브 멀티 에이전트 워크플로로 넘겨, 메인 세션의 컨텍스트가 병목이 되지 않게 합니다.
+작은·중간 작업은 메인 세션에서 스킬이 주도하는 평평한 디스패치로 돕니다. 큰 계획에 한꺼번에 진행할 수 있는 독립 청크가 많으면, `auto-dev` 가 청크 목록을 정리해 Claude Code 네이티브 동적 워크플로(`ultracode`)로 돌리라고 안내합니다. 메인 세션의 컨텍스트가 병목이 되지 않게 하려는 것입니다. 그 워크플로는 대화형이라 사용자가 직접 시작하고, 스킬이 대신 띄울 수는 없습니다.
 
 ## 전문 에이전트
 
-에이전트는 기획·개발·메타 역할로 나뉘고, frontmatter 에 모델 등급이 있습니다. 전략·분석·리뷰는 Opus, 구현·수정은 Sonnet, 빠른 점검은 Haiku 입니다. 파일을 고치는 에이전트(`implement-code`·`fix-bugs`·`write-tests`·`sync-docs`)는 격리된 git worktree 에서 돌아 병렬 작업이 충돌하지 않고, 병합 복귀 규칙은 `rules/parallel-worktree.md` 에 있습니다.
+에이전트는 기획·개발·메타 역할로 나뉘고, 각자 frontmatter 에 모델을 지정합니다. 기획 에이전트와 `plan-implementation`·`review-code`·`devils-advocate` 는 Opus, 구현·수정·테스트·외부 조사·보안 스캔은 Sonnet, `verify-code`·`git-workflow`·`analyze-dependencies`·`sync-docs` 처럼 가볍고 빠른 일은 Haiku 를 씁니다. 파일을 고치는 에이전트(`implement-code`·`fix-bugs`·`write-tests`·`sync-docs`)는 격리된 git worktree 에서 돌아 병렬 작업이 충돌하지 않고, 병합 복귀 규칙은 `rules/parallel-worktree.md` 에 있습니다.
 
 모델·effort 설정은 Claude Code 에서만 적용됩니다. Codex 와 Antigravity 는 에이전트를 서브에이전트로 노출하지 않고, 스킬이 같은 계약을 세션 안에서 수행합니다.
 

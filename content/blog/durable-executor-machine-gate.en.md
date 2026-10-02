@@ -6,6 +6,7 @@ description: "Let a loop agent mark its own work as done and unverified code sai
 tags: ["loop engineering", "completion gates", "adversarial review", "durable execution"]
 translationKey: durable-executor-machine-gate
 aliases: ["/posts/2026-07-03-durable-executor-machine-gate/"]
+alias_to_lang: ko
 ---
 
 The previous two posts mapped the landscape of harness and loop engineering ([research notes](https://github.com/This-HW/hiway-kit/blob/main/docs/research/2026-07-harness-loop-engineering.md)) and then [applied it to git isolation for parallel work](/blog/harness-engineering-in-practice/). This one is about the next question: when an agent runs a loop **across many sessions over a long time**, what decides that something is "done"?

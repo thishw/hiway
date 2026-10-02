@@ -94,7 +94,7 @@
       <div class="feature">
         <dt>{{ .title }}</dt>
         <dd>{{ .body | $.Page.RenderString }}
-          {{- with .where }}<a class="where" href="{{ site.Params.repo }}/{{ .path }}"><code>{{ .label }}</code></a>{{ end }}
+          {{- with .where }}{{- $parts := split .path "/" }}<a class="where" href="{{ site.Params.repo }}/{{ index $parts 0 }}/{{ $k.source.tag }}/{{ delimit (after 1 $parts) "/" }}"><code>{{ .label }}</code></a>{{ end }}
         </dd>
       </div>
       {{- end }}

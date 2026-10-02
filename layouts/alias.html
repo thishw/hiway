@@ -1,14 +1,16 @@
-{{- /* Old posts lived at /posts/<date>-<slug>/ and were Korean. The alias is declared on the
-       English page (so it lands at the site root) but sends readers to the Korean translation
-       when one exists. Other aliases (e.g. /en/) redirect to their own page. */ -}}
+{{- /* An alias redirects to its own page, except when the page sets `alias_to_lang`:
+       the old /posts/<date>-<slug>/ addresses were Korean, so the English post declares the
+       alias (to land at the site root) with alias_to_lang: ko and readers reach the Korean post. */ -}}
 {{- $target := .Permalink -}}
+{{- $lang := site.Language.Lang -}}
 {{- with .Page -}}
-  {{- if eq .Section "blog" -}}
-    {{- range .Translations -}}{{- if eq .Language.Lang "ko" -}}{{- $target = .Permalink -}}{{- end -}}{{- end -}}
+  {{- with .Params.alias_to_lang -}}
+    {{- $want := . -}}
+    {{- range $.Page.Translations -}}{{- if eq .Language.Lang $want -}}{{- $target = .Permalink -}}{{- $lang = $want -}}{{- end -}}{{- end -}}
   {{- end -}}
 {{- end -}}
 <!doctype html>
-<html lang="en">
+<html lang="{{ $lang }}">
 <head>
 <title>{{ $target }}</title>
 <link rel="canonical" href="{{ $target }}">

@@ -1,5 +1,6 @@
 {{- /* {{< kit "agents" >}} · {{< kit "version" >}} — facts from data/kit.json only. */ -}}
 {{- $k := hugo.Data.kit -}}
+{{- if not $k.counts }}{{ errorf "data/kit.json is missing or malformed. Run scripts/fetch-kit-facts.py." }}{{ end -}}
 {{- $key := .Get 0 -}}
 {{- if eq $key "version" }}{{ $k.version }}
 {{- else if eq $key "tag" }}{{ $k.source.tag }}

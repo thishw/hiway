@@ -6,6 +6,7 @@ description: "We tracked down a bug where the final task stayed in_progress afte
 tags: ["task lifecycle", "prompt injection", "adversarial review", "harness engineering", "debugging"]
 translationKey: the-last-task-never-closes
 aliases: ["/posts/2026-07-07-the-last-task-never-closes/"]
+alias_to_lang: ko
 ---
 
 A user reported an odd pattern: **"Everything's finished, but the last task keeps getting left behind, never marked complete."**

@@ -169,6 +169,29 @@ class FromTagTests(unittest.TestCase):
             with self.assertRaisesRegex(fkf.FactsError, "tarball commit"):
                 fkf.from_tag("This-HW/hiway-kit", http)
 
+    def test_tarball_without_commit_binding_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            http = FakeHttp(self.routes(make_kit(Path(tmp) / "kit"), comment=None))
+            with self.assertRaisesRegex(fkf.FactsError, "tarball commit"):
+                fkf.from_tag("This-HW/hiway-kit", http)
+
+    def test_link_inside_plugins_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            kit = make_kit(Path(tmp) / "kit")
+            (kit / "plugins/common/skills/four").mkdir()
+            (kit / "plugins/common/skills/four/SKILL.md").symlink_to(kit / "plugins/common/skills/one/SKILL.md")
+            http = FakeHttp(self.routes(kit))
+            with self.assertRaisesRegex(fkf.FactsError, "link inside plugins"):
+                fkf.from_tag("This-HW/hiway-kit", http)
+
+    def test_failure_removes_facts_from_an_earlier_run(self):
+        http = FakeHttp({"/tags?": fkf.FactsError("GET tags failed: offline")})
+        with mock.patch.object(fkf, "http_get", http), tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "kit.json"
+            out.write_text('{"stale": true}', encoding="utf-8")
+            self.assertEqual(fkf.main(["--out", str(out)]), 1)
+            self.assertFalse(out.exists(), "stale facts must not survive a failed fetch")
+
     def test_network_failure_fails_the_build(self):
         http = FakeHttp({"/tags?": fkf.FactsError("GET tags failed: timed out")})
         rc = self._main_with(http)

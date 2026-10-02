@@ -65,11 +65,11 @@ Where: `rules/feedback-loop.md`, `tools/feedback_ledger.py`.
 
 ## Orchestration that fits the size
 
-Small and Medium work runs as flat, skill-driven dispatch. Large work goes to Claude Code's native multi-agent workflows when you opt into them, which keeps the main session's context from becoming the bottleneck.
+Small and Medium work runs as flat, skill-driven dispatch from the main session. When a Large plan has many independent chunks ready at once, `auto-dev` lists them and suggests running them as a native Claude Code dynamic workflow (`ultracode`) instead, so the main session's context does not become the bottleneck. That workflow is interactive: you start it yourself, the skill cannot.
 
 ## Specialized agents
 
-The agents are split into planning, development and meta roles, each with a model tier in its frontmatter: Opus for strategy, analysis and review; Sonnet for implementation and fixes; Haiku for quick checks. Agents that modify files (`implement-code`, `fix-bugs`, `write-tests`, `sync-docs`) run in an isolated git worktree so parallel work does not collide, and the merge-back rules live in `rules/parallel-worktree.md`.
+The agents are split into planning, development and meta roles, and each sets its model in frontmatter. The planning agents, `plan-implementation`, `review-code` and `devils-advocate` use Opus; implementation, fixes, tests, external research and the security scan use Sonnet; quick, low-effort jobs such as `verify-code`, `git-workflow`, `analyze-dependencies` and `sync-docs` use Haiku. Agents that modify files (`implement-code`, `fix-bugs`, `write-tests`, `sync-docs`) run in an isolated git worktree so parallel work does not collide, and the merge-back rules live in `rules/parallel-worktree.md`.
 
 Model and effort settings apply in Claude Code. Codex and Antigravity do not expose the agents as subagents; there the skills perform the same contracts in the session.
 

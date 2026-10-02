@@ -44,32 +44,32 @@ features:
       body: "Open questions are graded P0 to P3. Only P0 — data integrity, security, money, core business — stops the work and asks you. The rest gets a stated default and a note."
       where:
         label: "skills/plan-task"
-        path: "tree/main/plugins/common/skills/plan-task"
+        path: "tree/plugins/common/skills/plan-task"
     - title: "Adversarial review"
       body: "`review-code` reads a finished diff in a context separate from the author's, as four personas: a hacker, Murphy, your future self and a picky user. `multi-perspective-review` takes a design through up to ten viewpoints."
       where:
         label: "agents/dev/review-code.md"
-        path: "blob/main/plugins/common/agents/dev/review-code.md"
+        path: "blob/plugins/common/agents/dev/review-code.md"
     - title: "Done is decided by a command"
       body: "“Done” is not a judgment. Until the verification command has been run fresh and its output read, the agent reports “implemented, not yet verified” and lists what is left."
       where:
         label: "rules/definition-of-done.md"
-        path: "blob/main/plugins/common/rules/definition-of-done.md"
+        path: "blob/plugins/common/rules/definition-of-done.md"
     - title: "Learning from failures"
       body: "Review and validation findings go into a feedback ledger under `.git/kit/`, capped, de-duplicated and decaying. The next session starts with the recurring ones as lessons."
       where:
         label: "tools/feedback_ledger.py"
-        path: "blob/main/plugins/common/tools/feedback_ledger.py"
+        path: "blob/plugins/common/tools/feedback_ledger.py"
     - title: "Boundaries checked by your own tools"
       body: "If your project already runs a boundary checker such as import-linter or dependency-cruiser, `plan-task` writes its command into the plan's completion conditions. If there is none, the plan says so; adopting one stays your call."
       where:
         label: "plan-task/references/boundary-check.md"
-        path: "blob/main/plugins/common/skills/plan-task/references/boundary-check.md"
+        path: "blob/plugins/common/skills/plan-task/references/boundary-check.md"
     - title: "More than one harness"
       body: "Rules and skills work in Claude Code, Codex and Antigravity. Dedicated subagents and hooks that block a tool call are Claude Code features; elsewhere the same discipline arrives as instructions."
       where:
-        label: "README · Other Harnesses"
-        path: "blob/main/README.md#other-harnesses-codex--antigravity"
+        label: "README: Other Harnesses"
+        path: "blob/README.md#other-harnesses-codex--antigravity"
 
 harnesses:
   heading: "Where it runs"
