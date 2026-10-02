@@ -1,0 +1,8 @@
+public/
+resources/
+.hugo_build.lock
+data/kit.json
+__pycache__/
+.pytest_cache/
+.htmltest/
+.ruff_cache/
