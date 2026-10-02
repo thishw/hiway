@@ -1,0 +1,22 @@
+{{ define "main" }}
+<div class="doc wrap">
+  <div class="doc-grid">
+    {{ partial "docs-nav.html" . }}
+    <article>
+      <header class="doc-head">
+        <h1>{{ .Title }}</h1>
+        {{- with .Description }}<p class="summary">{{ . }}</p>{{ end }}
+      </header>
+      <div class="prose">{{ .Content }}</div>
+      <ul class="post-list">
+        {{- range .Pages.ByWeight }}
+        <li>
+          <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+          {{- with .Description }}<p>{{ . }}</p>{{ end }}
+        </li>
+        {{- end }}
+      </ul>
+    </article>
+  </div>
+</div>
+{{ end }}

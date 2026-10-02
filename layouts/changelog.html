@@ -1,0 +1,26 @@
+{{ define "main" }}
+{{- $k := hugo.Data.kit }}
+<div class="doc wrap">
+  <div class="doc-grid">
+    {{ partial "docs-nav.html" . }}
+    <article>
+      <header class="doc-head">
+        <h1>{{ .Title }}</h1>
+        <p class="summary">{{ T "changelog_intro" (dict "tag" $k.source.tag) | safeHTML }}</p>
+      </header>
+      <div class="releases">
+        {{- range $k.changelog }}
+        <section class="release" lang="ko">
+          <div>
+            <h2>{{ .version }}</h2>
+            <time datetime="{{ .date }}">{{ .date }}</time>
+          </div>
+          <ul>{{ range .headings }}<li>{{ . | $.RenderString }}</li>{{ end }}</ul>
+        </section>
+        {{- end }}
+      </div>
+      <p class="facts-line"><a href="{{ site.Params.repo }}/blob/{{ $k.source.tag }}/CHANGELOG.md">{{ T "changelog_full" }}</a></p>
+    </article>
+  </div>
+</div>
+{{ end }}

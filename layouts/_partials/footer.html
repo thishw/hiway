@@ -1,0 +1,11 @@
+{{- $k := hugo.Data.kit }}
+<footer class="colophon">
+  <div class="wrap">
+    <p>{{ T "facts_footer" (dict "version" $k.version "tag" $k.source.tag "date" $k.source.date) | safeHTML }}</p>
+    <ul>
+      <li><a href="{{ relLangURL "privacy/" }}">{{ T "privacy" }}</a></li>
+      <li><a href="{{ site.Params.repo }}/blob/main/LICENSE">{{ T "license" }}</a></li>
+      <li><a href="{{ site.Params.site_repo }}">{{ T "site_source" }}</a></li>
+    </ul>
+  </div>
+</footer>

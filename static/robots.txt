@@ -1,0 +1,19 @@
+# hiway-kit — https://hiway.thishw.com/
+# Search engines and AI crawlers are welcome. See also /llms.txt.
+
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://hiway.thishw.com/sitemap.xml

@@ -1,0 +1,9 @@
+{{- /* Every count and version comes from data/kit.json (scripts/fetch-kit-facts.py).
+       Missing or malformed facts stop the build instead of shipping stale numbers. */ -}}
+{{- $k := hugo.Data.kit -}}
+{{- if not $k -}}
+  {{- errorf "data/kit.json is missing. Run scripts/fetch-kit-facts.py (or --from-path <hiway-kit checkout> locally)." -}}
+{{- end -}}
+{{- if not (and $k.version $k.counts $k.counts.agents $k.counts.skills $k.counts.rules $k.source.tag $k.privacy.markdown) -}}
+  {{- errorf "data/kit.json does not match the expected schema (version, counts, source.tag, privacy)." -}}
+{{- end -}}

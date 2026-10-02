@@ -1,0 +1,85 @@
+# hiway-kit product site — https://hiway.thishw.com/
+#
+# baseURL is fixed. Do not override it in CI (--baseURL): a project-site override once
+# shipped CSS that 404'd. For a local preview use `hugo server` (it rewrites to localhost).
+baseURL = "https://hiway.thishw.com/"
+title = "hiway-kit"
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
+enableRobotsTXT = false          # static/robots.txt is the source
+disableKinds = ["taxonomy", "term"]
+enableGitInfo = false
+
+# Every count and version on this site is read from data/kit.json, which
+# scripts/fetch-kit-facts.py generates from the latest hiway-kit release tag.
+# The file is not committed; a build without it fails (layouts/_partials/kit.html).
+
+[params]
+  repo = "https://github.com/This-HW/hiway-kit"
+  site_repo = "https://github.com/thishw/hiway"
+  marketplace = "This-HW/hiway-kit"
+
+[outputs]
+  home = ["html", "llms"]
+  section = ["html", "rss"]
+  page = ["html"]
+
+[outputFormats.llms]
+  mediaType = "text/plain"
+  baseName = "llms"
+  isPlainText = true
+  notAlternative = true
+  permalinkable = true
+
+[markup.goldmark.renderer]
+  unsafe = false
+
+[markup.highlight]
+  noClasses = false
+  lineNos = false
+
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 3
+
+[sitemap]
+  changefreq = "weekly"
+
+[languages]
+  [languages.en]
+    label = "English"
+    locale = "en"
+    weight = 1
+    [languages.en.params]
+      description = "hiway-kit is a plugin of agents, skills and rules for coding agents. It plans before it builds, and it treats done as the output of a command."
+    [[languages.en.menus.main]]
+      name = "Docs"
+      pageRef = "/docs"
+      weight = 1
+    [[languages.en.menus.main]]
+      name = "Blog"
+      pageRef = "/blog"
+      weight = 2
+    [[languages.en.menus.main]]
+      name = "Changelog"
+      pageRef = "/changelog"
+      weight = 3
+
+  [languages.ko]
+    label = "한국어"
+    locale = "ko"
+    weight = 2
+    [languages.ko.params]
+      description = "hiway-kit 은 코딩 에이전트를 위한 에이전트·스킬·규칙 플러그인이다. 짜기 전에 계획하고, 완료를 명령의 출력으로 판정한다."
+    [[languages.ko.menus.main]]
+      name = "문서"
+      pageRef = "/docs"
+      weight = 1
+    [[languages.ko.menus.main]]
+      name = "블로그"
+      pageRef = "/blog"
+      weight = 2
+    [[languages.ko.menus.main]]
+      name = "변경 기록"
+      pageRef = "/changelog"
+      weight = 3

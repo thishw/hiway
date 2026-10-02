@@ -1,0 +1,15 @@
+{{ define "main" }}
+{{- $k := hugo.Data.kit }}
+<div class="doc wrap">
+  <div class="doc-grid">
+    {{ partial "docs-nav.html" . }}
+    <article>
+      <header class="doc-head">
+        <h1>{{ .Title }}</h1>
+        <p class="summary">{{ T "privacy_source" (dict "tag" $k.source.tag "updated" $k.privacy.updated) | safeHTML }}</p>
+      </header>
+      <div class="prose" lang="en">{{ $k.privacy.markdown | .RenderString (dict "display" "block") }}</div>
+    </article>
+  </div>
+</div>
+{{ end }}

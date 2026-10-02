@@ -1,0 +1,163 @@
+{{ define "bodyclass" }}home{{ end }}
+{{ define "main" }}
+{{- $k := hugo.Data.kit }}
+{{- $p := .Params }}
+{{- $gs := site.GetPage "/docs/getting-started" }}
+
+<section class="hero wrap" aria-labelledby="hero-title">
+  <h1 id="hero-title">{{ $p.hero.headline }}</h1>
+  <p class="lede">{{ $p.hero.lede }}</p>
+  <div class="actions">
+    <a class="button" href="#install">{{ $p.hero.primary }}</a>
+    {{- with $gs }}<a class="textlink" href="{{ .RelPermalink }}">{{ $p.hero.secondary }}</a>{{ end }}
+  </div>
+  <pre class="terminal" aria-label="{{ T "install_commands" }}"><span class="cmd">/plugin marketplace add {{ site.Params.marketplace }}</span>
+<span class="cmd">/plugin install hiway-kit@hiway-kit</span></pre>
+</section>
+
+<section class="band" aria-labelledby="problem-title">
+  <div class="wrap split">
+    <h2 id="problem-title">{{ $p.problem.heading }}</h2>
+    <div class="prose-lg">{{ $p.problem.body | $.Page.RenderString (dict "display" "block") }}</div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="how-title">
+  <div class="wrap">
+    <div class="split">
+      <h2 id="how-title">{{ $p.how.heading }}</h2>
+      <div class="prose-lg"><p>{{ $p.how.intro }}</p></div>
+    </div>
+    {{- $s := $p.how.svg }}
+    <figure class="track" aria-label="{{ $s.alt }}">
+      <svg class="track-wide" viewBox="0 0 1000 230" role="img" aria-hidden="true" focusable="false">
+        <defs>
+          <marker id="arrow-ink" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" style="fill: var(--ink)"/></marker>
+          <marker id="arrow-fail" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" style="fill: var(--fail)"/></marker>
+          <marker id="arrow-pass" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" style="fill: var(--pass)"/></marker>
+        </defs>
+        <line class="road" x1="16" y1="116" x2="984" y2="116" stroke-width="14" stroke-linecap="round"/>
+        <line class="lane travel" x1="24" y1="116" x2="770" y2="116" stroke-width="2" marker-end="url(#arrow-ink)"/>
+        <line class="pass" x1="812" y1="116" x2="962" y2="116" stroke-width="3" marker-end="url(#arrow-pass)"/>
+        <!-- planning gate -->
+        <rect class="gate-bar" x="194" y="78" width="10" height="76" rx="3"/>
+        <!-- build loop -->
+        <circle class="cycle" cx="500" cy="116" r="46" fill="none" stroke-width="2" stroke-dasharray="4 6"/>
+        <path class="lane" d="M538 90 A46 46 0 0 0 470 82" fill="none" stroke-width="2" marker-end="url(#arrow-ink)"/>
+        <!-- verification gate -->
+        <rect class="gate-bar" x="790" y="78" width="10" height="76" rx="3"/>
+        <path class="fail" d="M792 70 C 760 14, 600 14, 532 70" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow-fail)"/>
+        <text class="sub" x="662" y="22" text-anchor="middle" style="fill: var(--fail)">{{ $s.fail }}</text>
+        <text class="sub" x="962" y="96" text-anchor="end" style="fill: var(--pass)">{{ $s.done }}</text>
+        <text class="label" x="199" y="190" text-anchor="middle">{{ $s.gate1 }}</text>
+        <text class="sub" x="199" y="212" text-anchor="middle">{{ $s.gate1_sub }}</text>
+        <text class="label" x="500" y="190" text-anchor="middle">{{ $s.loop }}</text>
+        <text class="sub" x="500" y="212" text-anchor="middle">{{ $s.loop_sub }}</text>
+        <text class="label" x="795" y="190" text-anchor="middle">{{ $s.gate2 }}</text>
+        <text class="sub" x="795" y="212" text-anchor="middle">{{ $s.gate2_sub }}</text>
+      </svg>
+      <svg class="track-mobile" viewBox="0 0 320 560" role="img" aria-hidden="true" focusable="false" style="display:none">
+        <line class="road" x1="110" y1="16" x2="110" y2="544" stroke-width="14" stroke-linecap="round"/>
+        <line class="lane" x1="110" y1="22" x2="110" y2="414" stroke-width="2" marker-end="url(#arrow-ink)"/>
+        <line class="pass" x1="110" y1="452" x2="110" y2="530" stroke-width="3" marker-end="url(#arrow-pass)"/>
+        <rect class="gate-bar" x="72" y="104" width="76" height="10" rx="3"/>
+        <circle class="cycle" cx="110" cy="270" r="40" fill="none" stroke-width="2" stroke-dasharray="4 6"/>
+        <rect class="gate-bar" x="72" y="430" width="76" height="10" rx="3"/>
+        <path class="fail" d="M66 432 C 14 400, 14 300, 64 284" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow-fail)"/>
+        <text class="label" x="170" y="106">{{ $s.gate1 }}</text>
+        <text class="sub" x="170" y="126">{{ $s.gate1_sub }}</text>
+        <text class="label" x="170" y="266">{{ $s.loop }}</text>
+        <text class="sub" x="170" y="286">{{ $s.loop_sub }}</text>
+        <text class="label" x="170" y="432">{{ $s.gate2 }}</text>
+        <text class="sub" x="170" y="452">{{ $s.gate2_sub }}</text>
+        <text class="sub" x="130" y="530" style="fill: var(--pass)">{{ $s.done }}</text>
+        <text class="sub" x="14" y="352" transform="rotate(-90 14 352)" text-anchor="middle" style="fill: var(--fail)">{{ $s.fail_short }}</text>
+      </svg>
+      <figcaption class="skip">{{ $s.alt }}</figcaption>
+    </figure>
+    <ol class="stations">
+      {{- range $p.how.stations }}
+      <li>
+        <h3>{{ .title }}</h3>
+        <p>{{ .body | $.Page.RenderString }}</p>
+      </li>
+      {{- end }}
+    </ol>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="features-title">
+  <div class="wrap">
+    <h2 id="features-title">{{ $p.features.heading }}</h2>
+    <dl class="features">
+      {{- range $p.features.items }}
+      <div class="feature">
+        <dt>{{ .title }}</dt>
+        <dd>{{ .body | $.Page.RenderString }}
+          {{- with .where }}<a class="where" href="{{ site.Params.repo }}/{{ .path }}"><code>{{ .label }}</code></a>{{ end }}
+        </dd>
+      </div>
+      {{- end }}
+    </dl>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="harness-title">
+  <div class="wrap">
+    <div class="split">
+      <h2 id="harness-title">{{ $p.harnesses.heading }}</h2>
+      <div class="prose-lg"><p>{{ $p.harnesses.intro }}</p></div>
+    </div>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr><th scope="col"><span class="skip">{{ T "harness" }}</span></th>{{ range $p.harnesses.columns }}<th scope="col">{{ . }}</th>{{ end }}</tr>
+        </thead>
+        <tbody>
+          {{- range $p.harnesses.rows }}
+          <tr>
+            <th scope="row">{{ .name }}</th>
+            {{- range $i, $c := .cells }}<td data-label="{{ index $p.harnesses.columns $i }}"><span class="{{ $c.state }}">{{ $c.text }}</span></td>{{ end }}
+          </tr>
+          {{- end }}
+        </tbody>
+      </table>
+    </div>
+    <p class="matrix-note">{{ $p.harnesses.note | $.Page.RenderString }}</p>
+    <p class="facts-line">{{ T "ships_counts" (dict "agents" $k.counts.agents "skills" $k.counts.skills "rules" $k.counts.rules "version" $k.version) }}</p>
+  </div>
+</section>
+
+<section class="band" id="install" aria-labelledby="install-title">
+  <div class="wrap">
+    <h2 id="install-title">{{ $p.install.heading }}</h2>
+    <div class="install">
+      <div>
+        <h3>{{ $p.install.claude.title }}</h3>
+        <p>{{ $p.install.claude.body | $.Page.RenderString }}</p>
+        <pre><code>/plugin marketplace add {{ site.Params.marketplace }}
+/plugin install hiway-kit@hiway-kit</code></pre>
+        <p>{{ $p.install.claude.after | $.Page.RenderString }}</p>
+      </div>
+      <div>
+        {{- range $p.install.others }}
+        <div class="other">
+          <h3>{{ .title }}</h3>
+          <p>{{ .body | $.Page.RenderString }}</p>
+        </div>
+        {{- end }}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="closing" aria-label="{{ $p.closing.label }}">
+  <div class="wrap">
+    <p>{{ $p.closing.line }}</p>
+    <div class="actions">
+      {{- with $gs }}<a class="button" href="{{ .RelPermalink }}">{{ $p.closing.primary }}</a>{{ end }}
+      <a class="textlink" href="{{ site.Params.repo }}">{{ $p.closing.secondary }}</a>
+    </div>
+  </div>
+</section>
+{{ end }}

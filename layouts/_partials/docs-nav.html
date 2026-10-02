@@ -1,0 +1,16 @@
+<aside class="sidenav">
+  <nav aria-label="{{ T "docs" }}">
+    {{- $docs := site.GetPage "/docs" }}
+    <p class="group"><a href="{{ $docs.RelPermalink }}"{{ if eq $docs . }} aria-current="page"{{ end }}>{{ $docs.Title }}</a></p>
+    <ul>
+      {{- range $docs.Pages.ByWeight }}
+      <li><a href="{{ .RelPermalink }}"{{ if eq . $ }} aria-current="page"{{ end }}>{{ .LinkTitle }}</a></li>
+      {{- end }}
+      {{- range slice "/changelog" "/privacy" }}
+      {{- with site.GetPage . }}
+      <li><a href="{{ .RelPermalink }}"{{ if eq . $ }} aria-current="page"{{ end }}>{{ .LinkTitle }}</a></li>
+      {{- end }}
+      {{- end }}
+    </ul>
+  </nav>
+</aside>

@@ -1,0 +1,17 @@
+{{ define "main" }}
+<div class="doc wrap">
+  <header class="doc-head">
+    <h1>{{ .Title }}</h1>
+    {{- with .Description }}<p class="summary">{{ . }}</p>{{ end }}
+  </header>
+  <ul class="post-list">
+    {{- range .Pages.ByDate.Reverse }}
+    <li>
+      <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date | time.Format ":date_long" }}</time>
+      <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+      {{- with .Description }}<p>{{ . }}</p>{{ end }}
+    </li>
+    {{- end }}
+  </ul>
+</div>
+{{ end }}

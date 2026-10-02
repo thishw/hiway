@@ -1,0 +1,25 @@
+<header class="masthead">
+  <div class="wrap">
+    <a class="wordmark" href="{{ site.Home.RelPermalink }}">{{ partial "mark.html" }}hiway-kit</a>
+    <nav class="nav" aria-label="{{ T "nav_main" }}">
+      {{- $cur := . }}
+      {{- range site.Menus.main }}
+      {{- $active := or ($cur.IsMenuCurrent "main" .) ($cur.HasMenuCurrent "main" .) (and .Page (eq $cur.Section .Page.Section) (ne $cur.Section "")) }}
+      <a href="{{ .URL }}"{{ if $active }} aria-current="page"{{ end }}>{{ .Name }}</a>
+      {{- end }}
+      <a href="{{ site.Params.repo }}">GitHub</a>
+    </nav>
+    <div class="tools">
+      {{- $target := "" }}
+      {{- range .Translations }}{{ $target = . }}{{ end }}
+      {{- if not $target }}{{ range site.Home.Translations }}{{ $target = . }}{{ end }}{{ end }}
+      {{- with $target }}
+      <a class="lang" href="{{ .RelPermalink }}" hreflang="{{ .Language.Lang }}" lang="{{ .Language.Lang }}">{{ .Language.Label }}</a>
+      {{- end }}
+      <button class="theme-toggle" type="button" aria-label="{{ T "theme_toggle" }}">
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</header>

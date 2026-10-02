@@ -1,0 +1,24 @@
+{{ define "bodyclass" }}article{{ end }}
+{{ define "main" }}
+<article class="doc wrap article">
+  <header class="doc-head">
+    <h1>{{ .Title }}</h1>
+    {{- with .Description }}<p class="summary">{{ . }}</p>{{ end }}
+    <p class="byline">
+      <span>{{ T "published" }} <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date | time.Format ":date_long" }}</time></span>
+      {{- if ne (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02") }}
+      <span>{{ T "updated" }} <time datetime="{{ .Lastmod.Format "2006-01-02" }}">{{ .Lastmod | time.Format ":date_long" }}</time></span>
+      {{- end }}
+      {{- range .Translations }}<a href="{{ .RelPermalink }}" hreflang="{{ .Language.Lang }}">{{ T "read_in_other" }}</a>{{ end }}
+    </p>
+  </header>
+  <div class="prose">{{ .Content }}</div>
+  <nav class="pager" aria-label="{{ T "all_posts" }}">
+    {{- with .NextInSection }}<a href="{{ .RelPermalink }}" rel="prev">{{ .LinkTitle }}</a>{{ else }}<span></span>{{ end }}
+    {{- with .PrevInSection }}<a href="{{ .RelPermalink }}" rel="next">{{ .LinkTitle }}</a>{{ end }}
+  </nav>
+  {{- with .Params.tags }}
+  <ul class="tags" aria-label="tags">{{ range . }}<li>{{ . }}</li>{{ end }}</ul>
+  {{- end }}
+</article>
+{{ end }}

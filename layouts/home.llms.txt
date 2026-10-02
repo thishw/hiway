@@ -1,0 +1,29 @@
+{{- $k := hugo.Data.kit -}}
+# hiway-kit
+
+> {{ site.Params.description }}
+
+hiway-kit {{ $k.version }} ({{ $k.source.tag }}, {{ $k.source.date }}) ships {{ $k.counts.agents }} agents, {{ $k.counts.skills }} skills and {{ $k.counts.rules }} rules for Claude Code, Codex and Antigravity. Source: {{ site.Params.repo }}
+
+Install in Claude Code:
+
+    /plugin marketplace add {{ site.Params.marketplace }}
+    /plugin install hiway-kit@hiway-kit
+
+## Docs
+{{ range (site.GetPage "/docs").Pages.ByWeight }}
+- [{{ .Title }}]({{ .Permalink }}){{ with .Description }}: {{ . }}{{ end }}
+{{- end }}
+- [Changelog]({{ (site.GetPage "/changelog").Permalink }})
+- [Privacy policy]({{ (site.GetPage "/privacy").Permalink }})
+
+## Blog
+{{ range (site.GetPage "/blog").Pages.ByDate.Reverse }}
+- [{{ .Title }}]({{ .Permalink }}){{ with .Description }}: {{ . }}{{ end }}
+{{- end }}
+
+## Optional
+
+{{- range site.Home.Translations }}
+- [{{ .Language.Label }}]({{ with .OutputFormats.Get "html" }}{{ .Permalink }}{{ end }})
+{{- end }}
