@@ -1,8 +1,9 @@
 name: Check
 
 # The review gate for pull requests: the site builds without warnings, has no broken
-# internal links, carries no hand-written counts or versions, and loads nothing from
-# another origin. Runs without secrets, so it works on pull requests from forks.
+# internal links, carries no hand-written counts or versions, loads nothing from
+# another origin, and no page scrolls sideways on a phone. Runs without secrets, so it
+# works on pull requests from forks.
 on:
   pull_request:
   workflow_dispatch:
@@ -65,6 +66,11 @@ jobs:
       - name: Nothing loaded from another origin, no trackers or ads
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: python3 scripts/check_site.py origins
+      - name: No page scrolls sideways at 390px (Chrome preinstalled on ubuntu-latest)
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          google-chrome --version
+          python3 scripts/check_site.py overflow
       - name: Upload the built site for visual review
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

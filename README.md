@@ -17,7 +17,7 @@ Policies: no trackers, no external font CDNs, no ads. AI crawlers allowed.
 | `layouts/`, `assets/`, `i18n/` | The theme, written for this site (no Hugo modules or external themes) |
 | `static/` | `robots.txt`, favicon, self-hosted fonts with their OFL licence files |
 | `scripts/fetch-kit-facts.py` | Writes `data/kit.json` from the latest hiway-kit release tag |
-| `scripts/check_site.py` | `hand-numbers` and `origins` checks used by CI |
+| `scripts/check_site.py` | `hand-numbers`, `origins` and `overflow` checks used by CI |
 | `.htmltest.yml` | Internal link check over `public/` |
 | `.github/workflows/` | `pages.yml` deploys; `check.yml` is the pull-request gate |
 
@@ -64,7 +64,10 @@ hugo --gc --minify --panicOnWarning                # 1. build, warnings are erro
 htmltest                                           # 2. no broken internal links (v0.17.0)
 python3 scripts/check_site.py hand-numbers         # 3. no hand-written counts or versions
 python3 scripts/check_site.py origins              # 4. nothing loaded from another origin, no trackers or ads
+CHROME=/path/to/chrome python3 scripts/check_site.py overflow   # 5. no page scrolls sideways at 390px
 ```
+
+`overflow` opens every built page in headless Chrome (`$CHROME`, else `google-chrome`/`chromium` on `PATH`; CI uses the one preinstalled on `ubuntu-latest`). Exit 2 means no browser was found.
 
 In CI, Hugo and htmltest are downloaded at a pinned version and verified against a SHA-256 before use.
 

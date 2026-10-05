@@ -418,6 +418,7 @@ svg {
 }
 .split {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem clamp(2rem, 1rem + 5vw, 6rem);
 }
 @media (min-width: 56rem) {
@@ -504,6 +505,7 @@ svg {
 .stations {
   margin-top: clamp(2rem, 1rem + 3vw, 3.5rem);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2rem 3rem;
   list-style: none;
   padding: 0;
@@ -541,6 +543,7 @@ svg {
 .features {
   margin-top: clamp(2.5rem, 1.5rem + 3vw, 4.5rem);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(2.25rem, 1.5rem + 2vw, 3.5rem) clamp(2rem, 1rem + 3vw, 4rem);
 }
 @media (min-width: 46rem) {
@@ -690,6 +693,7 @@ tbody th {
 .install {
   margin-top: clamp(2rem, 1rem + 3vw, 3.5rem);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2.5rem 3rem;
 }
 @media (min-width: 60rem) {
@@ -743,6 +747,7 @@ tbody th {
 }
 .doc-grid {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2.5rem clamp(2rem, 1rem + 4vw, 5rem);
 }
 @media (min-width: 60rem) {
@@ -973,6 +978,7 @@ tbody th {
   padding-block: 1.75rem;
   border-top: 1px solid var(--rule);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.5rem 2rem;
 }
 @media (min-width: 46rem) {
@@ -1047,6 +1053,7 @@ tbody th {
 }
 .colophon .wrap {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.25rem 3rem;
 }
 @media (min-width: 52rem) {

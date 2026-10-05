@@ -70,7 +70,7 @@ enableGitInfo = false
     locale = "ko"
     weight = 2
     [languages.ko.params]
-      description = "hiway-kit 은 코딩 에이전트를 위한 에이전트·스킬·규칙 플러그인이다. 짜기 전에 계획하고, 완료를 명령의 출력으로 판정한다."
+      description = "hiway-kit은 코딩 에이전트를 위한 에이전트·스킬·규칙 플러그인이다. 짜기 전에 계획하고, 완료를 명령의 출력으로 판정한다."
     [[languages.ko.menus.main]]
       name = "문서"
       pageRef = "/docs"

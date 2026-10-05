@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import importlib.util
+import os
+import stat
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -145,6 +148,63 @@ class OriginTests(unittest.TestCase):
         self.assertTrue(
             self.run_on({"index.html": "", "ads.txt": "google.com, pub-1, DIRECT"})
         )
+
+
+FAKE_CHROME = """#!{python}
+# Stands in for Chrome: fetches the page from the check's local server (so the measuring
+# script must have been appended), then reports a width that depends on the page text.
+import sys, urllib.request
+page = urllib.request.urlopen(sys.argv[-1]).read().decode()
+if "addEventListener('load'" not in page:
+    sys.exit(0)
+if "NOMEASURE" in page:
+    print("<html><title>x</title></html>")
+else:
+    width = 470 if "WIDE" in page else 390
+    print("<html><title>ovf|%d|390|pre.code</title></html>" % width)
+"""
+
+
+class OverflowTests(unittest.TestCase):
+    def run_on(self, files: dict[str, str]) -> list[str]:
+        with tempfile.TemporaryDirectory() as tmp:
+            chrome = Path(tmp) / "fake-chrome"
+            chrome.write_text(FAKE_CHROME.format(python=sys.executable), encoding="utf-8")
+            chrome.chmod(chrome.stat().st_mode | stat.S_IEXEC)
+            public = tree(Path(tmp) / "public", files)
+            return cs.overflow(public, str(chrome))
+
+    def test_page_wider_than_the_window_fails(self):
+        problems = self.run_on({"index.html": "<p>ok</p>", "docs/a/index.html": "<p>WIDE</p>"})
+        self.assertEqual(len(problems), 1)
+        self.assertIn("docs/a/index.html: 470px wide in a 390px window", problems[0])
+        self.assertIn("pre.code", problems[0])
+
+    def test_fitting_pages_pass(self):
+        self.assertEqual(self.run_on({"index.html": "<p>ok</p>", "b/index.html": "<p>ok</p>"}), [])
+
+    def test_alias_redirect_pages_are_skipped(self):
+        alias = "<meta http-equiv=refresh content=\"0; url=https://hiway.thishw.com/x/\">WIDE"
+        self.assertEqual(self.run_on({"index.html": "<p>ok</p>", "posts/x/index.html": alias}), [])
+
+    def test_unmeasurable_page_fails(self):
+        problems = self.run_on({"index.html": "<p>NOMEASURE</p>"})
+        self.assertEqual(len(problems), 1)
+        self.assertIn("could not be measured", problems[0])
+
+    def test_missing_build_output_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertTrue(cs.overflow(Path(tmp) / "nope", "unused"))
+
+    def test_no_chrome_is_exit_2_not_a_silent_pass(self):
+        old = {k: os.environ.get(k) for k in ("CHROME", "PATH")}
+        os.environ["CHROME"], os.environ["PATH"] = "", ""
+        try:
+            self.assertIsNone(cs.find_chrome())
+            self.assertEqual(cs.main(["overflow", "--public", "nowhere"]), 2)
+        finally:
+            for k, v in old.items():
+                os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
 
 
 if __name__ == "__main__":
