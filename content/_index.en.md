@@ -100,8 +100,9 @@ install:
   heading: "Install"
   claude:
     title: "Claude Code"
-    body: "Add the marketplace, then install the plugin. The hooks run on your machine's `python3` (3.9 or newer)."
-    after: "Plugins install at user scope, so this changes every session on the machine, including ones already running. Install when no long task is in flight. To update later: `/plugin marketplace update hiway-kit`."
+    body: "Install from Anthropic's directory, which is built into Claude Code. The hooks run on your machine's `python3` (3.9 or newer)."
+    alt: "Or add this repository as a marketplace to track `main` directly. Pick one: installing both loads every skill and hook twice."
+    after: "Plugins install at user scope, so this changes every session on the machine, including ones already running. Install when no long task is in flight. From the repository marketplace, update with `/plugin marketplace update hiway-kit`."
   others:
     - title: "Codex"
       body: "Clone the repository, add it as a plugin marketplace, then approve hook trust once. [Steps](/docs/getting-started/#codex)."

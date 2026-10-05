@@ -10,7 +10,17 @@ You need the [Claude Code CLI](https://code.claude.com) (`claude --version`). Th
 
 ## Install in Claude Code
 
-The marketplace name is `hiway-kit`:
+Pick **one** of two paths. Installing both loads every skill and hook twice.
+
+**From Anthropic's directory.** It is built into Claude Code, so there is no marketplace to add:
+
+```text
+/plugin install hiway-kit@anthropic-plugin-directory
+```
+
+Each version reaches the directory after Anthropic's scan, so it can trail the repository briefly.
+
+**From the repository as a marketplace.** This tracks `main` as soon as you update:
 
 ```text
 /plugin marketplace add This-HW/hiway-kit
@@ -22,8 +32,6 @@ To update later, refresh the marketplace and the new version is picked up:
 ```text
 /plugin marketplace update hiway-kit
 ```
-
-hiway-kit is not yet listed in Anthropic's community catalog. Until it is, the marketplace commands above are the only install path.
 
 ### Installing changes the whole machine
 

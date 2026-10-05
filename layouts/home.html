@@ -11,8 +11,7 @@
     <a class="button" href="#install">{{ $p.hero.primary }}</a>
     {{- with $gs }}<a class="textlink" href="{{ .RelPermalink }}">{{ $p.hero.secondary }}</a>{{ end }}
   </div>
-  <pre class="terminal" aria-label="{{ T "install_commands" }}"><span class="cmd">/plugin marketplace add {{ site.Params.marketplace }}</span>
-<span class="cmd">/plugin install hiway-kit@hiway-kit</span></pre>
+  <pre class="terminal" aria-label="{{ T "install_commands" }}"><span class="cmd">/plugin install hiway-kit@anthropic-plugin-directory</span></pre>
 </section>
 
 <section class="band" aria-labelledby="problem-title">
@@ -135,6 +134,8 @@
       <div>
         <h3>{{ $p.install.claude.title }}</h3>
         <p>{{ $p.install.claude.body | $.Page.RenderString }}</p>
+        <pre><code>/plugin install hiway-kit@anthropic-plugin-directory</code></pre>
+        <p>{{ $p.install.claude.alt | $.Page.RenderString }}</p>
         <pre><code>/plugin marketplace add {{ site.Params.marketplace }}
 /plugin install hiway-kit@hiway-kit</code></pre>
         <p>{{ $p.install.claude.after | $.Page.RenderString }}</p>

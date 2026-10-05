@@ -5,7 +5,11 @@
 
 hiway-kit {{ $k.version }} ({{ $k.source.tag }}, {{ $k.source.date }}) ships {{ $k.counts.agents }} agents, {{ $k.counts.skills }} skills and {{ $k.counts.rules }} rules for Claude Code, Codex and Antigravity. Source: {{ site.Params.repo }}
 
-Install in Claude Code:
+Install in Claude Code (pick one):
+
+    /plugin install hiway-kit@anthropic-plugin-directory
+
+or, tracking the repository's main branch:
 
     /plugin marketplace add {{ site.Params.marketplace }}
     /plugin install hiway-kit@hiway-kit

@@ -100,8 +100,9 @@ install:
   heading: "설치"
   claude:
     title: "Claude Code"
-    body: "마켓플레이스를 추가한 뒤 플러그인을 설치합니다. 훅은 이 머신의 `python3`(3.9 이상)로 돕니다."
-    after: "플러그인은 사용자 범위로 설치되므로, 이미 실행 중인 세션을 포함해 이 머신의 모든 세션이 바뀝니다. 긴 작업이 돌고 있지 않을 때 설치하세요. 업데이트는 `/plugin marketplace update hiway-kit`."
+    body: "Claude Code에 내장된 Anthropic 디렉토리에서 설치합니다. 훅은 이 머신의 `python3`(3.9 이상)로 돕니다."
+    alt: "`main`을 바로 따라가려면 이 레포를 마켓플레이스로 추가합니다. 둘 중 하나만 설치하세요. 둘 다 설치하면 모든 스킬과 훅이 두 번 로드됩니다."
+    after: "플러그인은 사용자 범위로 설치되므로, 이미 실행 중인 세션을 포함해 이 머신의 모든 세션이 바뀝니다. 긴 작업이 돌고 있지 않을 때 설치하세요. 레포 마켓플레이스로 설치했다면 업데이트는 `/plugin marketplace update hiway-kit`."
   others:
     - title: "Codex"
       body: "레포를 클론해 플러그인 마켓플레이스로 추가하고, 훅 신뢰를 한 번 승인합니다. [단계 보기](/ko/docs/getting-started/#codex)."

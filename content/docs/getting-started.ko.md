@@ -10,7 +10,17 @@ weight: 1
 
 ## Claude Code에 설치
 
-마켓플레이스 이름은 `hiway-kit`입니다.
+두 경로 중 **하나만** 고르세요. 둘 다 설치하면 모든 스킬과 훅이 두 번 로드됩니다.
+
+**Anthropic 디렉토리에서.** Claude Code에 내장돼 있어 마켓플레이스를 추가할 필요가 없습니다.
+
+```text
+/plugin install hiway-kit@anthropic-plugin-directory
+```
+
+새 버전은 Anthropic의 스캔을 거쳐 디렉토리에 올라가므로, 레포보다 잠시 늦을 수 있습니다.
+
+**레포를 마켓플레이스로.** 업데이트하는 즉시 `main`을 따라갑니다.
 
 ```text
 /plugin marketplace add This-HW/hiway-kit
@@ -22,8 +32,6 @@ weight: 1
 ```text
 /plugin marketplace update hiway-kit
 ```
-
-hiway-kit은 아직 Anthropic 커뮤니티 카탈로그에 올라 있지 않습니다. 올라가기 전까지는 위 마켓플레이스 명령이 유일한 설치 경로입니다.
 
 ### 설치는 이 프로젝트가 아니라 머신 전체를 바꾼다
 
