@@ -10,3 +10,6 @@ IgnoreDirectoryMissingTrailingSlash: false
 IgnoreAltMissing: false
 EnforceHTTPS: false
 OutputDir: ".htmltest"
+# 검색엔진 소유확인 파일(네이버는 본문이 한 줄 텍스트라 doctype이 없다) — 링크 검사 대상이 아니다.
+IgnoreFiles:
+  - "naver*.html"
