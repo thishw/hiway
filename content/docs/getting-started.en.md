@@ -18,7 +18,7 @@ Pick **one** of two paths. Installing both loads every skill and hook twice.
 /plugin install hiway-kit@anthropic-plugin-directory
 ```
 
-Each version reaches the directory after Anthropic's scan, so it can trail the repository briefly.
+The directory serves the version Anthropic has approved. Check the installed version before using features from the [latest repository release](/changelog/).
 
 **From the repository as a marketplace.** This tracks `main` as soon as you update:
 
@@ -57,14 +57,15 @@ Other skills you will reach for: `/review` for a lint, adversarial review and, w
 
 ## Codex {#codex}
 
-The plugin root ships a native Codex manifest. Add a local clone as a plugin marketplace:
+Add the GitHub repository as a plugin marketplace:
 
 ```bash
-git clone https://github.com/This-HW/hiway-kit
-codex plugin marketplace add ./hiway-kit
+codex plugin marketplace add This-HW/hiway-kit
 codex plugin add hiway-kit@hiway-kit-marketplace
 codex plugin list   # shows hiway-kit@hiway-kit-marketplace
 ```
+
+To install from an existing local checkout, pass its path to `codex plugin marketplace add`. The repository marketplace and the Codex plugin directory have separate release paths.
 
 **Then trust the hooks once.** Codex skips a plugin's hooks in silence until you approve them, and nothing in the session tells you the rules were not injected. Start an interactive `codex` session in your project and approve the hook trust prompt. With non-interactive `codex exec` there is no prompt, so hooks stay skipped unless you pass `--dangerously-bypass-hook-trust`; use it only where you already trust the plugin.
 

@@ -18,7 +18,7 @@ weight: 1
 /plugin install hiway-kit@anthropic-plugin-directory
 ```
 
-새 버전은 Anthropic의 스캔을 거쳐 디렉토리에 올라가므로, 레포보다 잠시 늦을 수 있습니다.
+디렉토리에서는 Anthropic의 심사를 통과한 버전을 제공합니다. [최신 저장소 릴리스](/ko/changelog/)의 기능을 쓰려면 먼저 설치된 버전을 확인하세요.
 
 **레포를 마켓플레이스로.** 업데이트하는 즉시 `main`을 따라갑니다.
 
@@ -57,14 +57,15 @@ weight: 1
 
 ## Codex {#codex}
 
-플러그인 루트에는 Codex 용 네이티브 매니페스트가 함께 들어 있습니다. 로컬 클론을 플러그인 마켓플레이스로 추가합니다.
+GitHub 저장소를 플러그인 마켓플레이스로 추가합니다.
 
 ```bash
-git clone https://github.com/This-HW/hiway-kit
-codex plugin marketplace add ./hiway-kit
+codex plugin marketplace add This-HW/hiway-kit
 codex plugin add hiway-kit@hiway-kit-marketplace
 codex plugin list   # hiway-kit@hiway-kit-marketplace 가 보이면 성공
 ```
+
+이미 로컬에 클론한 버전을 설치하려면 `codex plugin marketplace add`에 그 경로를 넘기세요. 저장소 마켓플레이스와 Codex 플러그인 디렉토리는 배포 경로가 다릅니다.
 
 **그다음 훅 신뢰를 한 번 승인합니다.** Codex는 승인 전까지 플러그인 훅을 조용히 건너뛰고, 규칙이 주입되지 않았다는 사실을 세션 어디에서도 알려 주지 않습니다. 프로젝트에서 대화형 `codex` 세션을 한 번 열어 훅 신뢰 프롬프트를 승인하세요. 비대화형 `codex exec`에는 프롬프트가 없어서 `--dangerously-bypass-hook-trust`를 주지 않으면 훅이 계속 건너뛰어집니다. 이미 신뢰하는 환경에서만 쓰세요.
 

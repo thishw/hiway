@@ -65,15 +65,26 @@ features:
       where:
         label: "plan-task/references/boundary-check.md"
         path: "blob/plugins/common/skills/plan-task/references/boundary-check.md"
+    - title: "코드 탐색과 변경 미리보기"
+      body: "`code-intel`은 설치된 ast-grep으로 코드 구조를 검색하고 규칙에 따른 변경을 미리 보여줍니다. 지원하는 언어 서버가 있으면 정의·참조·진단도 조회할 수 있습니다. 미리보기는 원본을 그대로 두며, 언어 서버는 신뢰하는 작업 공간에서 사용하세요."
+      where:
+        label: "skills/code-intel"
+        path: "tree/plugins/common/skills/code-intel"
+    - title: "이전 세션에서 결정한 내용 찾기"
+      body: "`session-history`는 직접 선택한 로컬 Codex·Claude Code 세션 로그를 검색하고, 근거가 있는 파일과 줄 번호를 알려줍니다."
+      where:
+        label: "skills/session-history"
+        path: "tree/plugins/common/skills/session-history"
     - title: "여러 하네스에서"
-      body: "규칙과 스킬은 Claude Code·Codex·Antigravity에서 모두 작동합니다. 전용 서브에이전트와 도구 호출을 막는 훅은 Claude Code 기능이고, 다른 하네스에서는 같은 규율이 지침으로 전달됩니다."
+      body: "공통 스킬과 규칙은 Claude Code·Codex·Antigravity에서 사용할 수 있습니다. 전용 서브에이전트와 도구 호출을 막는 훅은 Claude Code에서 지원합니다. 하네스별 적용 방식은 아래 표에서 확인할 수 있습니다."
       where:
         label: "README: Other Harnesses"
-        path: "blob/README.md#other-harnesses-codex--antigravity"
+        path: "blob/README.md#other-harnesses-codex--antigravity--gemini-cli"
+  note: "[개발 노트: C/C++ 인덱싱과 프로젝트 설정](/ko/blog/code-navigation-and-project-setup/)"
 
 harnesses:
   heading: "지원 하네스"
-  intro: "하네스마다 무엇이 되는지는 추정이 아니라 실제 CLI로 측정했습니다. 규칙과 스킬은 어디서나 작동하고, 달라지는 것은 전달 방식입니다."
+  intro: "아래 표는 저장소 릴리스 기준입니다. 설치한 버전과 하네스의 스킬·규칙·훅 지원 범위에 따라 쓸 수 있는 기능이 달라집니다."
   columns: ["규칙", "스킬", "서브에이전트", "차단 훅"]
   rows:
     - name: "Claude Code"
@@ -100,12 +111,12 @@ install:
   heading: "설치"
   claude:
     title: "Claude Code"
-    body: "Claude Code에 내장된 Anthropic 디렉토리에서 설치합니다. 훅은 이 머신의 `python3`(3.9 이상)로 돕니다."
+    body: "Claude Code에 내장된 Anthropic 디렉토리에서는 심사를 통과한 버전을 설치할 수 있습니다. 위에 표시된 저장소 릴리스보다 이전 버전일 수 있습니다. 훅은 이 머신의 `python3`(3.9 이상)에서 실행됩니다."
     alt: "`main`을 바로 따라가려면 이 레포를 마켓플레이스로 추가합니다. 둘 중 하나만 설치하세요. 둘 다 설치하면 모든 스킬과 훅이 두 번 로드됩니다."
     after: "플러그인은 사용자 범위로 설치되므로, 이미 실행 중인 세션을 포함해 이 머신의 모든 세션이 바뀝니다. 긴 작업이 돌고 있지 않을 때 설치하세요. 레포 마켓플레이스로 설치했다면 업데이트는 `/plugin marketplace update hiway-kit`."
   others:
     - title: "Codex"
-      body: "레포를 클론해 플러그인 마켓플레이스로 추가하고, 훅 신뢰를 한 번 승인합니다. [단계 보기](/ko/docs/getting-started/#codex)."
+      body: "Codex에서 GitHub 저장소를 플러그인 마켓플레이스로 추가한 뒤 훅을 승인합니다. [단계 보기](/ko/docs/getting-started/#codex)."
     - title: "Antigravity"
       body: "로컬 클론의 `plugins/common`을 검증한 뒤 설치합니다. 문서로 확인된 경로는 로컬 설치뿐입니다. [단계 보기](/ko/docs/getting-started/#antigravity)."
 

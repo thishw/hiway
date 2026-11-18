@@ -65,15 +65,26 @@ features:
       where:
         label: "plan-task/references/boundary-check.md"
         path: "blob/plugins/common/skills/plan-task/references/boundary-check.md"
+    - title: "Code navigation and change previews"
+      body: "Use `code-intel` for structural search and rule-based change previews with an installed ast-grep, or for definitions, references and diagnostics with a supported language server. Previews leave the source files alone. Run language servers only in workspaces you trust."
+      where:
+        label: "skills/code-intel"
+        path: "tree/plugins/common/skills/code-intel"
+    - title: "Find decisions from earlier sessions"
+      body: "`session-history` searches the local Codex or Claude Code session logs you select and points to the source file and line."
+      where:
+        label: "skills/session-history"
+        path: "tree/plugins/common/skills/session-history"
     - title: "More than one harness"
-      body: "Rules and skills work in Claude Code, Codex and Antigravity. Dedicated subagents and hooks that block a tool call are Claude Code features; elsewhere the same discipline arrives as instructions."
+      body: "Claude Code, Codex and Antigravity can use the shared skills and rules. Dedicated subagents and blocking hooks are available in Claude Code. The matrix below shows how each host loads the kit."
       where:
         label: "README: Other Harnesses"
-        path: "blob/README.md#other-harnesses-codex--antigravity"
+        path: "blob/README.md#other-harnesses-codex--antigravity--gemini-cli"
+  note: "[Development notes: C/C++ indexing and project setup](/blog/code-navigation-and-project-setup/)"
 
 harnesses:
   heading: "Where it runs"
-  intro: "What each harness gets was measured against the real CLIs, not assumed. Rules and skills travel everywhere; what changes is how they arrive."
+  intro: "The table describes the repository release on each host. Features depend on the version you install and on the host's support for skills, rules and hooks."
   columns: ["Rules", "Skills", "Subagents", "Blocking hooks"]
   rows:
     - name: "Claude Code"
@@ -100,12 +111,12 @@ install:
   heading: "Install"
   claude:
     title: "Claude Code"
-    body: "Install from Anthropic's directory, which is built into Claude Code. The hooks run on your machine's `python3` (3.9 or newer)."
+    body: "Anthropic's built-in directory serves versions it has approved. The directory version can lag the repository release shown above. Hooks use your machine's `python3` (3.9 or newer)."
     alt: "Or add this repository as a marketplace to track `main` directly. Pick one: installing both loads every skill and hook twice."
     after: "Plugins install at user scope, so this changes every session on the machine, including ones already running. Install when no long task is in flight. From the repository marketplace, update with `/plugin marketplace update hiway-kit`."
   others:
     - title: "Codex"
-      body: "Clone the repository, add it as a plugin marketplace, then approve hook trust once. [Steps](/docs/getting-started/#codex)."
+      body: "Add the GitHub repository as a plugin marketplace in Codex, then approve the hooks. [Steps](/docs/getting-started/#codex)."
     - title: "Antigravity"
       body: "Validate and install from `plugins/common` of a local clone. Only local installation is documented. [Steps](/docs/getting-started/#antigravity)."
 
