@@ -6,27 +6,36 @@
                                             and carry no analytics or ad code
   check_site.py overflow [--public public]  no built page scrolls sideways at 390x844
                                             (needs Chrome: $CHROME, or google-chrome/chromium on PATH)
+  check_site.py kit-links [--root .] [--tag vX.Y.Z | --from-path ../hiway-kit]
+                                            every hiway-kit blob/tree link in content/ names a
+                                            path that exists in the kit, and every #anchor on a
+                                            kit Markdown file is one of its headings (default:
+                                            the newest release tag, fetched like fetch-kit-facts)
 
 Exit 0 = clean, 1 = violations (each printed as file:line, or page for overflow), 2 = the
-check could not run (no browser). Internal links are checked separately by htmltest
+check could not run (no browser, or the kit could not be fetched). Internal links are checked separately by htmltest
 (.htmltest.yml).
 """
 
 from __future__ import annotations
 
 import argparse
+import contextlib
 import html
 import http.server
+import importlib.util
 import os
 import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import threading
+import unicodedata
 from functools import partial
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 SITE_HOST = "hiway.thishw.com"
 
@@ -320,6 +329,158 @@ def overflow(public: Path, chrome: str) -> list[str]:
     return problems
 
 
+# --- links into the kit repository ---------------------------------------------
+#
+# The site points at files in hiway-kit two ways: the home page's "where" entries
+# (front matter ``path: "blob/<path>"`` or ``"tree/<path>"``, rendered against the release
+# tag in data/kit.json) and full GitHub URLs in Markdown (``…/hiway-kit/blob/<ref>/<path>``).
+# Every one must name a file (blob) or directory (tree) that exists in the kit tree, and a
+# ``#fragment`` on a Markdown file must be an anchor GitHub generates from one of its
+# headings (or an explicit ``<a id|name>``).
+#
+# Which kit tree: by default the newest vX.Y.Z tag, fetched exactly the way
+# scripts/fetch-kit-facts.py fetches it, so the gate sees what the built site links to.
+# ``--tag`` pins another release tag; ``--from-path`` reads a local checkout as it is
+# (development only, e.g. a release candidate). A URL that names its own ref (blog posts
+# use ``main``) is still checked against that one tree: what users install is the release,
+# and a link that resolves only on main points at something not yet released.
+KIT_REPO = "This-HW/hiway-kit"
+KIT_SCAN = ("content",)
+KIT_URL = re.compile(
+    r"https?://github\.com/This-HW/hiway-kit/(blob|tree)/([^/\s)\"'<>#]+)/([^\s)\"'<>#?]*)(?:#([^\s)\"'<>]*))?",
+    re.I,
+)
+WHERE_PATH = re.compile(
+    r"""^\s*path:\s*["']?(blob|tree)/([^"'\s#]*)(?:#([^"'\s]*))?["']?\s*$"""
+)
+MD_SUFFIXES = {".md", ".markdown"}
+ATX_HEADING = re.compile(r"^ {0,3}#{1,6}(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$")
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+HTML_ANCHOR = re.compile(r"""<a\s[^>]*?\b(?:id|name)\s*=\s*["']([^"']+)["']""", re.I)
+
+
+def github_slug(heading: str) -> str:
+    """The anchor GitHub gives a heading: rendered text, lower-cased, punctuation dropped."""
+    text = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", heading)  # links and images → text
+    text = re.sub(r"<[^>]+>", "", text).replace("`", "").lower()
+    # GitHub keeps \p{Word} (letters, marks, decimal digits, connectors), hyphen and space.
+    kept = (
+        ch
+        for ch in text
+        if ch in " -"
+        or unicodedata.category(ch)[0] in "LM"
+        or unicodedata.category(ch) in ("Nd", "Pc")
+    )
+    return "".join(kept).replace(" ", "-")
+
+
+def md_anchors(text: str) -> set[str]:
+    anchors: set[str] = set()
+    seen: dict[str, int] = {}
+    fence: str | None = None
+    for line in text.splitlines():
+        f = FENCE.match(line)
+        if fence:
+            if f and f.group(1)[0] == fence[0] and len(f.group(1)) >= len(fence):
+                fence = None
+            continue
+        if f:
+            fence = f.group(1)
+            continue
+        h = ATX_HEADING.match(line)
+        if h and h.group(1):
+            slug = github_slug(h.group(1))
+            n = seen.get(slug, 0)
+            anchors.add(slug if n == 0 else f"{slug}-{n}")
+            seen[slug] = n + 1
+        anchors.update(HTML_ANCHOR.findall(line))
+    return anchors
+
+
+def _kit_target(
+    kit: Path, kind: str, path: str, fragment: str | None, cache: dict
+) -> str | None:
+    """Why ``kind/path#fragment`` does not resolve in ``kit`` (resolved root), or None."""
+    rel = unquote(path).strip("/")
+    target = (kit / rel).resolve()  # resolved once; must stay inside the checkout
+    if target != kit and not target.is_relative_to(kit):
+        return "leaves the kit checkout"
+    if kind == "blob" and not target.is_file():
+        return (
+            "is a directory, link it with tree/" if target.is_dir() else "no such file"
+        )
+    if kind == "tree" and not target.is_dir():
+        return (
+            "is a file, link it with blob/" if target.is_file() else "no such directory"
+        )
+    if fragment and target.suffix.lower() in MD_SUFFIXES:
+        if target not in cache:
+            cache[target] = md_anchors(target.read_text(encoding="utf-8"))
+        if unquote(fragment) not in cache[target]:
+            return f"no heading in {rel} makes anchor #{unquote(fragment)}"
+    return None
+
+
+def kit_links(root: Path, kit: Path, label: str = "kit") -> tuple[int, list[str]]:
+    """(number of links checked, problems) for every kit link under ``root``'s content."""
+    kit = kit.resolve()
+    problems: list[str] = []
+    cache: dict[Path, set[str]] = {}
+    checked = 0
+    for entry in KIT_SCAN:
+        base = root / entry
+        files = sorted(base.rglob("*.md")) if base.is_dir() else []
+        for f in files:
+            rel = f.relative_to(root).as_posix()
+            for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+                links = [
+                    (m.group(1), m.group(2), m.group(3))
+                    for m in [WHERE_PATH.match(line)]
+                    if m
+                ]
+                links += [
+                    (m.group(1), m.group(3), m.group(4)) for m in KIT_URL.finditer(line)
+                ]
+                for kind, path, fragment in links:
+                    checked += 1
+                    why = _kit_target(kit, kind.lower(), path, fragment, cache)
+                    if why:
+                        shown = f"{kind}/{path}" + (f"#{fragment}" if fragment else "")
+                        problems.append(f"{rel}:{n}: {shown} at {label}: {why}")
+    return checked, problems
+
+
+def _load_fetch_kit_facts():
+    spec = importlib.util.spec_from_file_location(
+        "fetch_kit_facts", Path(__file__).resolve().with_name("fetch-kit-facts.py")
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+@contextlib.contextmanager
+def kit_tree(from_path: Path | None, tag: str | None, repo: str = KIT_REPO):
+    """Yield (kit root, label) — a local checkout, or a release tag's tarball."""
+    if from_path is not None:
+        if not from_path.is_dir():
+            raise RuntimeError(f"--from-path {from_path} is not a directory")
+        r = subprocess.run(
+            ["git", "-C", str(from_path), "describe", "--tags", "--always", "--dirty"],
+            capture_output=True,
+            text=True,
+        )
+        yield from_path, f"{from_path} ({r.stdout.strip() or 'not a git checkout'})"
+        return
+    fkf = _load_fetch_kit_facts()
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            t = fkf.release_tag(repo, fkf.http_get, tag)
+            yield fkf.download_tag(repo, t, Path(tmp), fkf.http_get), t["name"]
+    except fkf.FactsError as e:
+        raise RuntimeError(str(e)) from e
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -329,6 +490,11 @@ def main(argv: list[str] | None = None) -> int:
     o.add_argument("--public", type=Path, default=Path("public"))
     v = sub.add_parser("overflow")
     v.add_argument("--public", type=Path, default=Path("public"))
+    k = sub.add_parser("kit-links")
+    k.add_argument("--root", type=Path, default=Path("."))
+    which = k.add_mutually_exclusive_group()
+    which.add_argument("--tag", help="release tag to check against (default: the newest vX.Y.Z)")
+    which.add_argument("--from-path", type=Path, help="local hiway-kit checkout, as it is (development only)")
     args = ap.parse_args(argv)
 
     if args.cmd == "overflow":
@@ -339,6 +505,14 @@ def main(argv: list[str] | None = None) -> int:
         problems = overflow(args.public, chrome)
     elif args.cmd == "hand-numbers":
         problems = hand_numbers(args.root)
+    elif args.cmd == "kit-links":
+        try:
+            with kit_tree(args.from_path, args.tag) as (kit, label):
+                checked, problems = kit_links(args.root, kit, label)
+        except RuntimeError as e:
+            print(f"kit-links: cannot read the kit: {e}", file=sys.stderr)
+            return 2
+        print(f"kit-links: {checked} link{'s' if checked != 1 else ''} checked against {label}")
     else:
         problems = origins(args.public)
     for p in problems:

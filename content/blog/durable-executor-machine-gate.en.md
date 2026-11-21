@@ -90,7 +90,7 @@ In the same spirit, we resisted the urge to write a new rule file. The disciplin
 
 After finishing the implementation — after `verify-done.sh` had gone green — I handed the code to **an adversarial reviewer with a fresh context**. That was the lesson of the [previous post](/blog/harness-engineering-in-practice/) put straight into practice. Passing a completion gate is not the same as being free of defects. Self-verification misses the holes you believe you've already closed.
 
-We wrote the principle itself into the kit as well. The [`review-code` agent definition](https://github.com/This-HW/hiway-kit/blob/main/plugins/common/agents/dev/review-code.md) states that "author ≠ verifier (fresh context, read-only)" is **met**, but honestly records that "self-preference bias in a reviewer from the same model family (judging its own family's output more leniently)" is still an **open gap**. Writing down what you've satisfied separately from what you haven't is the only kind of record the next person can actually trust.
+We wrote the principle itself into the kit as well. The [`review-code` agent definition](https://github.com/This-HW/hiway-kit/blob/main/plugins/common/agents/review-code.md) states that "author ≠ verifier (fresh context, read-only)" is **met**, but honestly records that "self-preference bias in a reviewer from the same model family (judging its own family's output more leniently)" is still an **open gap**. Writing down what you've satisfied separately from what you haven't is the only kind of record the next person can actually trust.
 
 ## 6. What that review actually caught
 

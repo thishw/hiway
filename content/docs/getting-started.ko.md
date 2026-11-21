@@ -6,7 +6,7 @@ weight: 1
 
 ## 설치 전에
 
-[Claude Code CLI](https://code.claude.com)가 필요합니다(`claude --version`). 킷의 훅은 이 머신의 `python3` 3.9 이상에서 돕니다. macOS 시스템 Python도 해당합니다. 더 낮은 버전이면 훅이 아무 일도 하지 않고, 세션이 한 번 경고합니다.
+[Claude Code CLI](https://code.claude.com)가 필요합니다(`claude --version`). 킷의 훅(레포 마켓플레이스 설치에만 있음, 아래 참고)은 이 머신의 `python3` 3.9 이상에서 돕니다. macOS 시스템 Python도 해당합니다. 더 낮은 버전이면 훅이 아무 일도 하지 않고, 세션이 한 번 경고합니다.
 
 ## Claude Code에 설치
 
@@ -18,9 +18,11 @@ weight: 1
 /plugin install hiway-kit@anthropic-plugin-directory
 ```
 
-디렉토리에서는 Anthropic의 심사를 통과한 버전을 제공합니다. [최신 저장소 릴리스](/ko/changelog/)의 기능을 쓰려면 먼저 설치된 버전을 확인하세요.
+디렉토리에서는 Anthropic의 심사를 통과한 버전을 제공하므로 저장소보다 늦을 수 있습니다. [최신 저장소 릴리스](/ko/changelog/)의 기능을 쓰려면 먼저 설치된 버전을 확인하세요.
 
-**레포를 마켓플레이스로.** 업데이트하는 즉시 `main`을 따라갑니다.
+**디렉토리 판에는 훅이 없습니다.** 디렉토리는 command 훅을 Verified 조직에게서만 받기 때문에, 디렉토리 판은 `hooks/hooks.json`을 뺀 킷 브랜치를 따라갑니다. 세션 시작 시 규칙 주입, 민감 경로 차단, 자동 포맷, 종료 시 검사가 모두 없습니다. 훅이 필요하면 아래의 레포 마켓플레이스로 설치하세요.
+
+**레포를 마켓플레이스로.** 업데이트하는 즉시 `main`을 따라가고, 훅이 포함됩니다.
 
 ```text
 /plugin marketplace add This-HW/hiway-kit
@@ -41,7 +43,7 @@ weight: 1
 
 ## 첫 작업
 
-세션이 시작되면 킷이 규칙과 짧은 워크플로 안내를 주입합니다. 그다음은 작업 크기가 경로를 정합니다.
+레포 마켓플레이스로 설치했다면 세션이 시작될 때 킷이 규칙과 짧은 워크플로 안내를 주입합니다. 스킬과 에이전트는 어느 경로로 설치해도 동작합니다. 그다음은 작업 크기가 경로를 정합니다.
 
 | 크기 | 경로 |
 | --- | --- |
@@ -80,12 +82,14 @@ codex plugin marketplace remove hiway-kit-marketplace
 
 ## Antigravity {#antigravity}
 
-로컬 클론의 `plugins/common`을 먼저 검증한 뒤 설치합니다.
+GitHub 저장소에서 바로 설치하거나(`agy`가 저장소 안의 `plugins/common`을 찾습니다), 로컬 클론을 검증한 뒤 설치합니다.
 
 ```bash
+agy plugin install https://github.com/This-HW/hiway-kit
+# 또는 로컬 클론에서:
 agy plugin validate /path/to/hiway-kit/plugins/common
 agy plugin install /path/to/hiway-kit/plugins/common
 agy plugin list   # hiway-kit 이 보이면 성공
 ```
 
-Antigravity는 스킬은 인식하지만 `rules/` 디렉토리와 중첩된 에이전트는 인식하지 않습니다. 그래서 규칙은 `AGENTS.md`·`GEMINI.md` 로만 전달됩니다. Google 문서에는 로컬·워크스페이스 설치만 나와 있고, 공개 레지스트리는 확인되지 않았습니다. 제거는 `agy plugin uninstall hiway-kit`.
+Antigravity는 스킬은 인식하지만 `rules/` 디렉토리와 에이전트는 인식하지 않습니다(에이전트의 `model:` frontmatter 때문입니다). 그래서 규칙은 `AGENTS.md`·`GEMINI.md` 로만 전달되니, 프로젝트에서 `/harness-export`를 실행하세요. Antigravity의 공식 공개 레지스트리는 확인되지 않았습니다. 제거는 `agy plugin uninstall hiway-kit`.

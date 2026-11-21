@@ -6,7 +6,7 @@ weight: 1
 
 ## Before you install
 
-You need the [Claude Code CLI](https://code.claude.com) (`claude --version`). The kit's hooks run on your machine's `python3`, version 3.9 or newer; the macOS system Python qualifies. On an older interpreter the hooks do nothing and the session warns you once.
+You need the [Claude Code CLI](https://code.claude.com) (`claude --version`). The kit's hooks (repository-marketplace install only, see below) run on your machine's `python3`, version 3.9 or newer; the macOS system Python qualifies. On an older interpreter the hooks do nothing and the session warns you once.
 
 ## Install in Claude Code
 
@@ -18,9 +18,11 @@ Pick **one** of two paths. Installing both loads every skill and hook twice.
 /plugin install hiway-kit@anthropic-plugin-directory
 ```
 
-The directory serves the version Anthropic has approved. Check the installed version before using features from the [latest repository release](/changelog/).
+The directory serves the version Anthropic has approved, so it can trail the repository. Check the installed version before using features from the [latest repository release](/changelog/).
 
-**From the repository as a marketplace.** This tracks `main` as soon as you update:
+**The directory version ships without hooks.** The directory accepts command hooks only from Verified organizations, so it tracks a branch of the kit without `hooks/hooks.json`: no rule injection at session start, no sensitive-path guard, no auto-format and no stop-time checks. For the hooks, use the repository marketplace below.
+
+**From the repository as a marketplace.** This tracks `main` as soon as you update, and it includes the hooks:
 
 ```text
 /plugin marketplace add This-HW/hiway-kit
@@ -41,7 +43,7 @@ Don't run two kits that ship the same skills at the same time. There is no plugi
 
 ## Your first task
 
-At session start the kit injects its rules and a short workflow note. From there, the size of the task decides the path:
+With the repository-marketplace install, the kit injects its rules and a short workflow note at session start; the skills and agents work either way. From there, the size of the task decides the path:
 
 | Size | Path |
 | --- | --- |
@@ -80,12 +82,14 @@ codex plugin marketplace remove hiway-kit-marketplace
 
 ## Antigravity {#antigravity}
 
-Validate first, then install from `plugins/common` of a local clone:
+Install straight from the GitHub repository (`agy` finds `plugins/common` in it), or validate and install from a local clone:
 
 ```bash
+agy plugin install https://github.com/This-HW/hiway-kit
+# or, from a local clone:
 agy plugin validate /path/to/hiway-kit/plugins/common
 agy plugin install /path/to/hiway-kit/plugins/common
 agy plugin list   # shows hiway-kit
 ```
 
-Antigravity recognizes the skills but not the `rules/` directory or the nested agents, so the rules reach it only through `AGENTS.md` or `GEMINI.md`. Google documents only local and workspace installation; no public registry is confirmed. Remove with `agy plugin uninstall hiway-kit`.
+Antigravity recognizes the skills but not the `rules/` directory or the agents (their `model:` frontmatter keeps them out), so the rules reach it only through `AGENTS.md` or `GEMINI.md`; run `/harness-export` in your project. No official public registry is confirmed for Antigravity. Remove with `agy plugin uninstall hiway-kit`.

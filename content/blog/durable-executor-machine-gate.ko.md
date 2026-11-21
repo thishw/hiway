@@ -88,7 +88,7 @@ def cmd_complete(plan_dir, item_id):
 
 구현을 마친 뒤 — `verify-done.sh`가 초록불을 켠 뒤 — 나는 그 코드를 **fresh context의 적대적 리뷰어**에게 다시 넘겼다. 이건 [지난 글](/ko/blog/harness-engineering-in-practice/)의 교훈을 그대로 실천한 것이다. 완료 게이트를 통과했다는 것과 결함이 없다는 것은 다르다. 자기 검증은 자기가 닫았다고 믿은 구멍을 놓친다.
 
-그리고 이 원칙 자체를 킷에도 새겼다 — [`review-code` 에이전트 문서](https://github.com/This-HW/hiway-kit/blob/main/plugins/common/agents/dev/review-code.md)에 "작성자≠검증자(fresh context, 읽기 전용)는 **충족**"이라고 명시하되, "같은 모델 계열 리뷰어의 self-preference bias(자기 계열 산출물을 관대하게 보는 편향)는 아직 **미충족 갭**"이라고 정직하게 남겼다. 충족한 것과 못 한 것을 구분해 적는 것 — 그것이 다음 사람이 신뢰할 수 있는 유일한 기록이다.
+그리고 이 원칙 자체를 킷에도 새겼다 — [`review-code` 에이전트 문서](https://github.com/This-HW/hiway-kit/blob/main/plugins/common/agents/review-code.md)에 "작성자≠검증자(fresh context, 읽기 전용)는 **충족**"이라고 명시하되, "같은 모델 계열 리뷰어의 self-preference bias(자기 계열 산출물을 관대하게 보는 편향)는 아직 **미충족 갭**"이라고 정직하게 남겼다. 충족한 것과 못 한 것을 구분해 적는 것 — 그것이 다음 사람이 신뢰할 수 있는 유일한 기록이다.
 
 ## 6. 그 리뷰가 실제로 잡은 것
 

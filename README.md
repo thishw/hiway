@@ -65,7 +65,10 @@ htmltest                                           # 2. no broken internal links
 python3 scripts/check_site.py hand-numbers         # 3. no hand-written counts or versions
 python3 scripts/check_site.py origins              # 4. nothing loaded from another origin, no trackers or ads
 CHROME=/path/to/chrome python3 scripts/check_site.py overflow   # 5. no page scrolls sideways at 390px
+python3 scripts/check_site.py kit-links            # 6. every hiway-kit blob/tree link and #anchor exists in the kit
 ```
+
+`kit-links` reads the newest hiway-kit release tag, fetched the same way as `fetch-kit-facts.py`, because the home page renders its kit links against that tag. Every hiway-kit link in `content/` is checked against that one tree, including URLs that name `main`. To check against a release candidate before it is tagged, pass `--from-path ../hiway-kit` (local only) or pin a tag with `--tag`. A link to a kit path or README heading that only exists on an unreleased branch stays red until the kit release that adds it is tagged, so merge such a site change after that release.
 
 `overflow` opens every built page in headless Chrome (`$CHROME`, else `google-chrome`/`chromium` on `PATH`; CI uses the one preinstalled on `ubuntu-latest`). Exit 2 means no browser was found.
 
