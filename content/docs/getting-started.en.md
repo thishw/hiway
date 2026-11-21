@@ -10,7 +10,7 @@ You need the [Claude Code CLI](https://code.claude.com) (`claude --version`). Th
 
 ## Install in Claude Code
 
-Pick **one** of two paths. Installing both loads every skill and hook twice.
+Pick **one** of two paths. Installing both loads every skill twice and mixes versions.
 
 **From Anthropic's directory.** It is built into Claude Code, so there is no marketplace to add:
 
@@ -20,7 +20,7 @@ Pick **one** of two paths. Installing both loads every skill and hook twice.
 
 The directory serves the version Anthropic has approved, so it can trail the repository. Check the installed version before using features from the [latest repository release](/changelog/).
 
-**The directory version ships without hooks.** The directory accepts command hooks only from Verified organizations, so it tracks a branch of the kit without `hooks/hooks.json`: no rule injection at session start, no sensitive-path guard, no auto-format and no stop-time checks. For the hooks, use the repository marketplace below.
+**The directory gets a reduced edition.** The directory accepts command hooks, script files and some agent settings only from Verified organizations, so it tracks a branch of the kit without them: no hooks (no rule injection at session start, no sensitive-path guard, no auto-format and no stop-time checks), no Python tools, no `code-intel`, `session-history` or `harness-export` skills, and agents that change files run without worktree isolation — they return their changes without committing, one at a time. Until a newer version passes the directory's review, it keeps serving an older one. For the full kit, use the repository marketplace below.
 
 **From the repository as a marketplace.** This tracks `main` as soon as you update, and it includes the hooks:
 

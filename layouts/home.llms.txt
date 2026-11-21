@@ -14,7 +14,7 @@ or, tracking the repository's main branch:
     /plugin marketplace add {{ site.Params.marketplace }}
     /plugin install hiway-kit@hiway-kit
 
-The directory install ships without hooks (no rule injection, sensitive-path guard, auto-format or stop-time checks); the repository marketplace install has them.
+The directory install is a reduced edition: no hooks (no rule injection, sensitive-path guard, auto-format or stop-time checks), no Python tools, no code-intel, session-history or harness-export skills, and file-changing agents without worktree isolation; until a newer version passes the directory's review it keeps serving an older one. The repository marketplace install is the full kit.
 
 ## Docs
 {{ range (site.GetPage "/docs").Pages.ByWeight }}

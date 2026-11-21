@@ -105,14 +105,14 @@ harnesses:
         - { state: "yes", text: "Recognized" }
         - { state: "no", text: "No" }
         - { state: "no", text: "No" }
-  note: "In Claude Code, the install from Anthropic's directory ships without hooks, so rules are not injected and nothing is blocked there. Codex skips plugin hooks in silence until you approve them once. The [getting-started guide](/docs/getting-started/#codex) shows how."
+  note: "In Claude Code, Anthropic's directory gets a reduced edition without hooks, so rules are not injected and nothing is blocked there (until a newer version passes its review, it keeps serving an older one that still has hooks). Codex skips plugin hooks in silence until you approve them once. The [getting-started guide](/docs/getting-started/#codex) shows how."
 
 install:
   heading: "Install"
   claude:
     title: "Claude Code"
-    body: "Anthropic's built-in directory serves versions it has approved, so it can lag the repository release shown above. The directory version ships without hooks: no rule injection, sensitive-path guard, auto-format or stop-time checks. For the hooks, use the repository marketplace."
-    alt: "Or add this repository as a marketplace to track `main` directly and get the hooks, which run on your machine's `python3` (3.9 or newer). Pick one: installing both loads every skill and hook twice."
+    body: "Anthropic's built-in directory serves versions it has approved, so it can lag the repository release shown above. It now gets a reduced edition: no hooks (no rule injection, sensitive-path guard, auto-format or stop-time checks), no Python tools, no code-intel, session-history or harness-export skills, and file-changing agents run without worktree isolation. Until a newer version passes its review, it keeps serving an older one. For the full kit, use the repository marketplace."
+    alt: "Or add this repository as a marketplace to track `main` directly and get the hooks, which run on your machine's `python3` (3.9 or newer). Pick one: installing both loads every skill twice and mixes versions."
     after: "Plugins install at user scope, so this changes every session on the machine, including ones already running. Install when no long task is in flight. From the repository marketplace, update with `/plugin marketplace update hiway-kit`."
   others:
     - title: "Codex"
