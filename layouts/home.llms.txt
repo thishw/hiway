@@ -14,6 +14,8 @@ or, tracking the repository's main branch:
     /plugin marketplace add {{ site.Params.marketplace }}
     /plugin install hiway-kit@hiway-kit
 
+The directory install ships without hooks (no rule injection, sensitive-path guard, auto-format or stop-time checks); the repository marketplace install has them.
+
 ## Docs
 {{ range (site.GetPage "/docs").Pages.ByWeight }}
 - [{{ .Title }}]({{ .Permalink }}){{ with .Description }}: {{ . }}{{ end }}

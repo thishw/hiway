@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import importlib.util
+import io
+import json
 import os
 import stat
 import sys
+import tarfile
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 HERE = Path(__file__).resolve().parent
 _spec = importlib.util.spec_from_file_location(
@@ -205,6 +210,211 @@ class OverflowTests(unittest.TestCase):
         finally:
             for k, v in old.items():
                 os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
+
+
+KIT_README = """# hiway-kit
+
+## Quick Install
+
+## Where it runs
+
+### What's Included
+
+## Other Harnesses (Codex · Antigravity · Gemini CLI)
+
+## 핵심 개념 & AI 엔지니어링 로직
+
+## [Start here](#start-here) `now`
+
+## Notes
+## Notes
+
+<a id="custom-anchor"></a>
+
+```bash
+# Not A Heading
+```
+"""
+
+KIT_FILES = {
+    "README.md": KIT_README,
+    "docs/harnesses.md": "# Harnesses\n\n## Codex\n",
+    "plugins/common/agents/review-code.md": "---\nname: review-code\n---\n",
+    "plugins/common/skills/plan-task/SKILL.md": "---\nname: plan-task\n---\n",
+}
+URL = "https://github.com/This-HW/hiway-kit"
+
+
+def home(*paths: str) -> str:
+    items = "".join(f'    - where:\n        path: "{p}"\n' for p in paths)
+    return f"---\nfeatures:\n  items:\n{items}---\n"
+
+
+class GithubSlugTests(unittest.TestCase):
+    def test_anchors_match_github(self):
+        anchors = cs.md_anchors(KIT_README)
+        for a in (
+            "quick-install",
+            "where-it-runs",
+            "whats-included",
+            "other-harnesses-codex--antigravity--gemini-cli",
+            "핵심-개념--ai-엔지니어링-로직",
+            "start-here-now",
+            "notes",
+            "notes-1",
+            "custom-anchor",
+        ):
+            with self.subTest(anchor=a):
+                self.assertIn(a, anchors)
+
+    def test_headings_inside_code_fences_make_no_anchor(self):
+        self.assertNotIn("not-a-heading", cs.md_anchors(KIT_README))
+
+
+class KitLinksTests(unittest.TestCase):
+    def run_on(self, content: dict[str, str]) -> tuple[int, list[str]]:
+        with tempfile.TemporaryDirectory() as tmp:
+            kit = tree(Path(tmp) / "kit", KIT_FILES)
+            site = tree(Path(tmp) / "site", content)
+            return cs.kit_links(site, kit, "vtest")
+
+    def test_links_that_exist_pass(self):
+        checked, problems = self.run_on(
+            {
+                "content/_index.en.md": home(
+                    "tree/plugins/common/skills/plan-task",
+                    "blob/plugins/common/agents/review-code.md",
+                    "blob/README.md#where-it-runs",
+                ),
+                "content/blog/a.en.md": (
+                    f"[r]({URL}/blob/main/plugins/common/agents/review-code.md) and "
+                    f"[h]({URL}/blob/main/docs/harnesses.md#codex) and "
+                    f"[k]({URL}/blob/main/README.md#%ED%95%B5%EC%8B%AC-%EA%B0%9C%EB%85%90--ai-%EC%97%94%EC%A7%80%EB%8B%88%EC%96%B4%EB%A7%81-%EB%A1%9C%EC%A7%81) "
+                    f"[s]({URL}/tree/main/plugins/common/skills/plan-task/)\n"
+                ),
+            }
+        )
+        self.assertEqual(problems, [])
+        self.assertEqual(checked, 7)
+
+    def test_each_kind_of_broken_link_fails_with_file_and_line(self):
+        cases = {
+            "blob/plugins/common/agents/dev/review-code.md": "no such file",
+            "tree/plugins/common/skills/gone": "no such directory",
+            "blob/plugins/common/skills/plan-task": "is a directory",
+            "tree/README.md": "is a file",
+            "blob/README.md#other-harnesses-codex--antigravity": "no heading in README.md makes anchor",
+            "blob/README.md#not-a-heading": "no heading in README.md makes anchor",
+            "blob/../site/content/_index.en.md": "leaves the kit checkout",
+        }
+        for path, why in cases.items():
+            with self.subTest(path=path):
+                _, problems = self.run_on({"content/_index.en.md": home("blob/README.md", path)})
+                self.assertEqual(len(problems), 1, problems)
+                self.assertTrue(problems[0].startswith("content/_index.en.md:7: "), problems[0])
+                self.assertIn(path, problems[0])
+                self.assertIn("at vtest", problems[0])
+                self.assertIn(why, problems[0])
+
+    def test_broken_url_in_prose_fails(self):
+        _, problems = self.run_on(
+            {"content/docs/x.ko.md": f"line one\n[a]({URL}/blob/main/plugins/common/agents/dev/review-code.md)\n"}
+        )
+        self.assertEqual(len(problems), 1)
+        self.assertTrue(problems[0].startswith("content/docs/x.ko.md:2: blob/plugins/common/agents/dev/review-code.md"))
+
+    def test_symlink_out_of_the_checkout_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            kit = tree(Path(tmp) / "kit", KIT_FILES)
+            secret = tree(Path(tmp) / "outside", {"secret.md": "# Secret\n"}) / "secret.md"
+            (kit / "docs/escape.md").symlink_to(secret)
+            site = tree(Path(tmp) / "site", {"content/a.md": f"{URL}/blob/main/docs/escape.md#secret\n"})
+            _, problems = cs.kit_links(site, kit, "vtest")
+        self.assertEqual(len(problems), 1)
+        self.assertIn("leaves the kit checkout", problems[0])
+
+    def test_other_repositories_and_non_kit_paths_are_ignored(self):
+        checked, problems = self.run_on(
+            {
+                "content/a.md": "https://github.com/thishw/hiway/blob/main/nope.md\n"
+                "https://github.com/This-HW/hiway-kit\n"
+                '  path: "docs/getting-started"\n'
+            }
+        )
+        self.assertEqual((checked, problems), (0, []))
+
+
+def kit_tarball(files: dict[str, str], sha: str) -> bytes:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = tree(Path(tmp) / "kit", files)
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w:gz", format=tarfile.PAX_FORMAT, pax_headers={"comment": sha}) as tf:
+            tf.add(root, arcname="hiway-kit-x")
+        return buf.getvalue()
+
+
+class KitLinksMainTests(unittest.TestCase):
+    """The command line: exit codes and which kit tree is read."""
+
+    def main(self, *argv: str) -> tuple[int, str]:
+        out = io.StringIO()
+        with redirect_stdout(out), redirect_stderr(out):
+            rc = cs.main(list(argv))
+        return rc, out.getvalue()
+
+    def test_from_path_exit_codes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            kit = tree(Path(tmp) / "kit", KIT_FILES)
+            good = tree(Path(tmp) / "good", {"content/_index.en.md": home("blob/README.md#where-it-runs")})
+            bad = tree(Path(tmp) / "bad", {"content/_index.en.md": home("blob/README.md#gone")})
+            rc, out = self.main("kit-links", "--root", str(good), "--from-path", str(kit))
+            self.assertEqual(rc, 0, out)
+            self.assertIn("1 link checked against", out)
+            rc, out = self.main("kit-links", "--root", str(bad), "--from-path", str(kit))
+            self.assertEqual(rc, 1, out)
+            self.assertIn("content/_index.en.md:5: blob/README.md#gone", out)
+            rc, out = self.main("kit-links", "--root", str(good), "--from-path", str(Path(tmp) / "missing"))
+            self.assertEqual(rc, 2, out)
+
+    def tag_mode(self, routes: dict, *argv: str) -> tuple[int, str]:
+        fkf = cs._load_fetch_kit_facts()
+
+        def get(url: str) -> bytes:
+            for key, val in routes.items():
+                if key in url:
+                    return val
+            raise fkf.FactsError(f"GET {url} failed: 404")
+
+        fkf.http_get = get
+        with mock.patch.object(cs, "_load_fetch_kit_facts", lambda: fkf):
+            return self.main("kit-links", *argv)
+
+    def test_default_reads_the_newest_release_tag_and_tag_pins_another(self):
+        new, old = "a" * 40, "b" * 40
+        routes = {
+            "/tags?": json.dumps(
+                [{"name": "v1.0.0", "commit": {"sha": old}}, {"name": "v2.0.0", "commit": {"sha": new}}]
+            ).encode(),
+            "/refs/tags/v2.0.0": kit_tarball(KIT_FILES, new),
+            "/refs/tags/v1.0.0": kit_tarball({"README.md": "# Old\n"}, old),
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            site = tree(Path(tmp) / "site", {"content/_index.en.md": home("blob/README.md#where-it-runs")})
+            rc, out = self.tag_mode(routes, "--root", str(site))
+            self.assertEqual(rc, 0, out)
+            self.assertIn("checked against v2.0.0", out)
+            rc, out = self.tag_mode(routes, "--root", str(site), "--tag", "v1.0.0")
+            self.assertEqual(rc, 1, out)
+            self.assertIn("at v1.0.0: no heading in README.md makes anchor #where-it-runs", out)
+            rc, out = self.tag_mode(routes, "--root", str(site), "--tag", "v9.9.9")
+            self.assertEqual(rc, 2, out)
+
+    def test_kit_that_cannot_be_fetched_is_exit_2_not_a_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            site = tree(Path(tmp) / "site", {"content/a.md": "no links\n"})
+            rc, out = self.tag_mode({}, "--root", str(site))
+        self.assertEqual(rc, 2, out)
+        self.assertIn("cannot read the kit", out)
 
 
 if __name__ == "__main__":

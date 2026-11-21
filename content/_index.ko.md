@@ -48,8 +48,8 @@ features:
     - title: "적대적 리뷰"
       body: "`review-code`는 작성자와 분리된 컨텍스트에서 완성된 diff를 해커·머피·미래의 나·까다로운 사용자, 네 페르소나로 읽습니다. 설계는 `multi-perspective-review`가 최대 열 가지 관점으로 검토합니다."
       where:
-        label: "agents/dev/review-code.md"
-        path: "blob/plugins/common/agents/dev/review-code.md"
+        label: "agents/review-code.md"
+        path: "blob/plugins/common/agents/review-code.md"
     - title: "완료는 명령이 판정한다"
       body: "“완료”는 판단이 아닙니다. 검증 명령을 새로 실행해 출력을 읽기 전까지 에이전트는 “구현 완료, 검증 전”이라고 말하고 남은 것을 적습니다."
       where:
@@ -76,7 +76,7 @@ features:
         label: "skills/session-history"
         path: "tree/plugins/common/skills/session-history"
     - title: "여러 하네스에서"
-      body: "공통 스킬과 규칙은 Claude Code·Codex·Antigravity에서 사용할 수 있습니다. 전용 서브에이전트와 도구 호출을 막는 훅은 Claude Code에서 지원합니다. 하네스별 적용 방식은 아래 표에서 확인할 수 있습니다."
+      body: "공통 스킬과 규칙은 Claude Code·Codex·Antigravity에서 사용할 수 있습니다. 전용 서브에이전트는 Claude Code에서 지원하고, 도구 호출을 막는 훅은 Claude Code에 레포 마켓플레이스로 설치했을 때 지원합니다. 하네스별 적용 방식은 아래 표에서 확인할 수 있습니다."
       where:
         label: "README: Other Harnesses"
         path: "blob/README.md#other-harnesses-codex--antigravity--gemini-cli"
@@ -89,10 +89,10 @@ harnesses:
   rows:
     - name: "Claude Code"
       cells:
-        - { state: "yes", text: "세션 시작 시 주입" }
+        - { state: "yes", text: "세션 시작 시 주입(레포 마켓플레이스 설치)" }
         - { state: "yes", text: "네이티브" }
         - { state: "yes", text: "지원" }
-        - { state: "yes", text: "지원" }
+        - { state: "yes", text: "지원(레포 마켓플레이스 설치)" }
     - name: "Codex"
       cells:
         - { state: "yes", text: "훅 신뢰 승인 후 주입, AGENTS.md 폴백" }
@@ -105,20 +105,20 @@ harnesses:
         - { state: "yes", text: "인식" }
         - { state: "no", text: "없음" }
         - { state: "no", text: "없음" }
-  note: "Codex는 한 번 승인하기 전까지 플러그인 훅을 조용히 건너뜁니다. 방법은 [시작하기 문서](/ko/docs/getting-started/#codex)에 있습니다."
+  note: "Claude Code에서 Anthropic 디렉토리로 설치한 판은 훅 없이 배포되므로 규칙이 주입되지 않고 아무것도 차단되지 않습니다. Codex는 한 번 승인하기 전까지 플러그인 훅을 조용히 건너뜁니다. 방법은 [시작하기 문서](/ko/docs/getting-started/#codex)에 있습니다."
 
 install:
   heading: "설치"
   claude:
     title: "Claude Code"
-    body: "Claude Code에 내장된 Anthropic 디렉토리에서는 심사를 통과한 버전을 설치할 수 있습니다. 위에 표시된 저장소 릴리스보다 이전 버전일 수 있습니다. 훅은 이 머신의 `python3`(3.9 이상)에서 실행됩니다."
-    alt: "`main`을 바로 따라가려면 이 레포를 마켓플레이스로 추가합니다. 둘 중 하나만 설치하세요. 둘 다 설치하면 모든 스킬과 훅이 두 번 로드됩니다."
+    body: "Claude Code에 내장된 Anthropic 디렉토리에서는 심사를 통과한 버전을 설치할 수 있습니다. 위에 표시된 저장소 릴리스보다 이전 버전일 수 있습니다. 디렉토리 판은 훅 없이 배포됩니다. 규칙 주입·민감 경로 차단·자동 포맷·종료 시 검사가 없습니다. 훅이 필요하면 레포 마켓플레이스로 설치하세요."
+    alt: "`main`을 바로 따라가고 훅까지 쓰려면 이 레포를 마켓플레이스로 추가합니다. 훅은 이 머신의 `python3`(3.9 이상)에서 실행됩니다. 둘 중 하나만 설치하세요. 둘 다 설치하면 모든 스킬과 훅이 두 번 로드됩니다."
     after: "플러그인은 사용자 범위로 설치되므로, 이미 실행 중인 세션을 포함해 이 머신의 모든 세션이 바뀝니다. 긴 작업이 돌고 있지 않을 때 설치하세요. 레포 마켓플레이스로 설치했다면 업데이트는 `/plugin marketplace update hiway-kit`."
   others:
     - title: "Codex"
       body: "Codex에서 GitHub 저장소를 플러그인 마켓플레이스로 추가한 뒤 훅을 승인합니다. [단계 보기](/ko/docs/getting-started/#codex)."
     - title: "Antigravity"
-      body: "로컬 클론의 `plugins/common`을 검증한 뒤 설치합니다. 문서로 확인된 경로는 로컬 설치뿐입니다. [단계 보기](/ko/docs/getting-started/#antigravity)."
+      body: "GitHub 저장소에서 바로 설치하거나, 로컬 클론의 `plugins/common`을 검증한 뒤 설치합니다. [단계 보기](/ko/docs/getting-started/#antigravity)."
 
 closing:
   label: "시작하기"

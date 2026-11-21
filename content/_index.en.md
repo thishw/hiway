@@ -48,8 +48,8 @@ features:
     - title: "Adversarial review"
       body: "`review-code` reads a finished diff in a context separate from the author's, as four personas: a hacker, Murphy, your future self and a picky user. `multi-perspective-review` takes a design through up to ten viewpoints."
       where:
-        label: "agents/dev/review-code.md"
-        path: "blob/plugins/common/agents/dev/review-code.md"
+        label: "agents/review-code.md"
+        path: "blob/plugins/common/agents/review-code.md"
     - title: "Done is decided by a command"
       body: "“Done” is not a judgment. Until the verification command has been run fresh and its output read, the agent reports “implemented, not yet verified” and lists what is left."
       where:
@@ -76,7 +76,7 @@ features:
         label: "skills/session-history"
         path: "tree/plugins/common/skills/session-history"
     - title: "More than one harness"
-      body: "Claude Code, Codex and Antigravity can use the shared skills and rules. Dedicated subagents and blocking hooks are available in Claude Code. The matrix below shows how each host loads the kit."
+      body: "Claude Code, Codex and Antigravity can use the shared skills and rules. Dedicated subagents are available in Claude Code, and blocking hooks there when you install from the repository marketplace. The matrix below shows how each host loads the kit."
       where:
         label: "README: Other Harnesses"
         path: "blob/README.md#other-harnesses-codex--antigravity--gemini-cli"
@@ -89,10 +89,10 @@ harnesses:
   rows:
     - name: "Claude Code"
       cells:
-        - { state: "yes", text: "Injected at session start" }
+        - { state: "yes", text: "Injected at session start (repository marketplace install)" }
         - { state: "yes", text: "Native" }
         - { state: "yes", text: "Yes" }
-        - { state: "yes", text: "Yes" }
+        - { state: "yes", text: "Yes (repository marketplace install)" }
     - name: "Codex"
       cells:
         - { state: "yes", text: "Injected once you trust the hooks; AGENTS.md as fallback" }
@@ -105,20 +105,20 @@ harnesses:
         - { state: "yes", text: "Recognized" }
         - { state: "no", text: "No" }
         - { state: "no", text: "No" }
-  note: "Codex skips plugin hooks in silence until you approve them once. The [getting-started guide](/docs/getting-started/#codex) shows how."
+  note: "In Claude Code, the install from Anthropic's directory ships without hooks, so rules are not injected and nothing is blocked there. Codex skips plugin hooks in silence until you approve them once. The [getting-started guide](/docs/getting-started/#codex) shows how."
 
 install:
   heading: "Install"
   claude:
     title: "Claude Code"
-    body: "Anthropic's built-in directory serves versions it has approved. The directory version can lag the repository release shown above. Hooks use your machine's `python3` (3.9 or newer)."
-    alt: "Or add this repository as a marketplace to track `main` directly. Pick one: installing both loads every skill and hook twice."
+    body: "Anthropic's built-in directory serves versions it has approved, so it can lag the repository release shown above. The directory version ships without hooks: no rule injection, sensitive-path guard, auto-format or stop-time checks. For the hooks, use the repository marketplace."
+    alt: "Or add this repository as a marketplace to track `main` directly and get the hooks, which run on your machine's `python3` (3.9 or newer). Pick one: installing both loads every skill and hook twice."
     after: "Plugins install at user scope, so this changes every session on the machine, including ones already running. Install when no long task is in flight. From the repository marketplace, update with `/plugin marketplace update hiway-kit`."
   others:
     - title: "Codex"
       body: "Add the GitHub repository as a plugin marketplace in Codex, then approve the hooks. [Steps](/docs/getting-started/#codex)."
     - title: "Antigravity"
-      body: "Validate and install from `plugins/common` of a local clone. Only local installation is documented. [Steps](/docs/getting-started/#antigravity)."
+      body: "Install straight from the GitHub repository, or validate and install `plugins/common` from a local clone. [Steps](/docs/getting-started/#antigravity)."
 
 closing:
   label: "Get started"

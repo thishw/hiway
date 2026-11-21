@@ -1,7 +1,8 @@
 name: Check
 
 # The review gate for pull requests: the site builds without warnings, has no broken
-# internal links, carries no hand-written counts or versions, loads nothing from
+# internal links, links into hiway-kit only at paths and headings that exist in its
+# latest release, carries no hand-written counts or versions, loads nothing from
 # another origin, and no page scrolls sideways on a phone. Runs without secrets, so it
 # works on pull requests from forks.
 on:
@@ -60,6 +61,11 @@ jobs:
       - name: Build (warnings are errors)
         id: build
         run: hugo --gc --minify --panicOnWarning
+      - name: Links into the kit name real files and README headings (latest release tag)
+        if: ${{ !cancelled() }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # raises the API rate limit only; the data is public
+        run: python3 scripts/check_site.py kit-links
       - name: No broken internal links
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: htmltest

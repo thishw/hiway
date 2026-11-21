@@ -297,14 +297,30 @@ def validate(facts: dict) -> None:
 # --- modes ---------------------------------------------------------------------
 
 
+def release_tag(repo: str, get: HttpGet, name: str | None = None) -> dict:
+    """The highest ``vX.Y.Z`` tag, or the tag called ``name``."""
+    tags = list_tags(repo, get)
+    if name is None:
+        return latest_tag(tags)
+    for t in tags:
+        if t.get("name") == name:
+            return t
+    raise FactsError(f"tag {name} not found in {repo}")
+
+
+def download_tag(repo: str, tag: dict, dest: Path, get: HttpGet) -> Path:
+    """Unpack ``tag``'s tarball under ``dest`` (bound to its commit) and return the tree."""
+    name, sha = tag["name"], tag["commit"]["sha"]
+    return extract_tarball(get(f"{CODELOAD}/{repo}/tar.gz/refs/tags/{name}"), dest, sha)
+
+
 def from_tag(repo: str, get: HttpGet | None = None) -> dict:
     get = get or http_get
-    tag = latest_tag(list_tags(repo, get))
+    tag = release_tag(repo, get)
     name, sha = tag["name"], tag["commit"]["sha"]
     date = commit_date(repo, sha, get)
-    blob = get(f"{CODELOAD}/{repo}/tar.gz/refs/tags/{name}")
     with tempfile.TemporaryDirectory() as tmp:
-        root = extract_tarball(blob, Path(tmp), sha)
+        root = download_tag(repo, tag, Path(tmp), get)
         return collect(
             root,
             {"repo": repo, "mode": "tag", "tag": name, "commit": sha, "date": date},
