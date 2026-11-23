@@ -1,3 +1,4 @@
+#DaumWebMasterTool:100bc190cb520bc303d0c84e96141094b404aeda27687f47076e22f5bcdf029f:4djnnmDYbaXJEU0i2qqWPQ==
 # hiway-kit — https://hiway.thishw.com/
 # Search engines and AI crawlers are welcome. See also /llms.txt.
 
